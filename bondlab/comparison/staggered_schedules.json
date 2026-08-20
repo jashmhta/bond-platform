@@ -1,0 +1,104 @@
+{
+ "INE572J07810": {
+  "face": null,
+  "schedule": [
+   {
+    "date": "26 Oct 2026",
+    "pct": 25.0,
+    "amount": "\u20b9 2500.00"
+   },
+   {
+    "date": "26 Apr 2027",
+    "pct": 25.0,
+    "amount": "\u20b9 2500.00"
+   },
+   {
+    "date": "26 Oct 2027",
+    "pct": 25.0,
+    "amount": "\u20b9 2500.00"
+   },
+   {
+    "date": "26 Apr 2028",
+    "pct": 25.0,
+    "amount": "\u20b9 2500.00"
+   }
+  ]
+ },
+ "INE14H407124": null,
+ "INE14H407132": null,
+ "INE14H407116": null,
+ "INE0MYJ07187": null,
+ "INE229U07178": null,
+ "INE01YL07441": null,
+ "INE998Y07212": null,
+ "INE01YL07409": null,
+ "INE403Q07GX0": null,
+ "INE882Z08049": null,
+ "INE01YL07383": null,
+ "INE07HK07825": null,
+ "INE859C07303": null,
+ "INE07HK07817": null,
+ "INE443L07174": null,
+ "INE516Y07444": {
+  "face": null,
+  "schedule": [
+   {
+    "date": "28 Sep 2026",
+    "pct": 3.2258
+   },
+   {
+    "date": "28 Mar 2027",
+    "pct": 9.6774
+   },
+   {
+    "date": "28 Sep 2027",
+    "pct": 9.6774
+   },
+   {
+    "date": "28 Mar 2028",
+    "pct": 9.6774
+   },
+   {
+    "date": "28 Sep 2028",
+    "pct": 9.6774
+   },
+   {
+    "date": "28 Mar 2029",
+    "pct": 9.6774
+   },
+   {
+    "date": "28 Sep 2029",
+    "pct": 9.6774
+   },
+   {
+    "date": "28 Mar 2030",
+    "pct": 9.6774
+   },
+   {
+    "date": "28 Sep 2030",
+    "pct": 9.6774
+   },
+   {
+    "date": "28 Mar 2031",
+    "pct": 9.6774
+   },
+   {
+    "date": "26 Sep 2031",
+    "pct": 9.6774
+   }
+  ]
+ },
+ "INE658F08540": null,
+ "INE658F08565": null,
+ "INE658F08516": null,
+ "INE0M2307099": null,
+ "INE0M2307065": null,
+ "INE0M2307172": null,
+ "INE0TLC07036": null,
+ "INE0TLC07077": null,
+ "INE0TLC07051": null,
+ "INE540P07509": null,
+ "INE540P07418": null,
+ "INE540P07491": null,
+ "INE540P07400": null
+}

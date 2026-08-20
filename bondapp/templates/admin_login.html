@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Admin Login | BondLab{% endblock %}
+{% block body %}
+<div class="login-wrap">
+  <div class="logo-row"><span class="logo" style="font-size:24px"><img class="logo-img big" src="{{ url_for('static', filename='logo.png') }}" alt="BondLab logo">BondLab</span></div>
+  <div class="card">
+    <h2><span class="dot"></span>Admin Login</h2>
+    <form method="post">
+      <label>Password</label>
+      <input type="password" name="password" required autofocus autocomplete="current-password">
+      <div style="margin-top:20px"><button class="btn primary" type="submit" style="width:100%">Login</button></div>
+    </form>
+    <p class="note">Default password: admin123 (set ADMIN_PASSWORD env to change).</p>
+  </div>
+</div>
+{% endblock %}

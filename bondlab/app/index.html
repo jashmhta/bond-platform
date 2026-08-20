@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BondLab — Bond Pricer, YTM Calculator & Settlement Breakup</title>
+<style>
+:root{
+  --bg:#0b1220;--panel:#111a2c;--panel2:#0e1626;--line:#1e2a44;--line2:#27365a;
+  --text:#e8eefc;--muted:#8fa3c8;--accent:#34d399;--accent2:#60a5fa;--gold:#fbbf24;--red:#f87171;
+  --mono:ui-monospace,'SF Mono','Cascadia Code','JetBrains Mono',Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font:15px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Inter,sans-serif;padding-bottom:60px}
+header{padding:26px 32px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:16px;flex-wrap:wrap;background:linear-gradient(180deg,#0d1728,#0b1220)}
+header h1{font-size:22px;letter-spacing:.3px}
+header h1 b{color:var(--accent)}
+header .tag{color:var(--muted);font-size:12.5px;border:1px solid var(--line2);padding:4px 10px;border-radius:999px}
+.wrap{max-width:1240px;margin:0 auto;padding:24px 24px}
+.grid{display:grid;grid-template-columns:400px 1fr;gap:20px}
+@media(max-width:980px){.grid{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px}
+.card h2{font-size:13px;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.card h2 .dot{width:7px;height:7px;border-radius:50%;background:var(--accent)}
+label{display:block;font-size:12px;color:var(--muted);margin:10px 0 4px}
+input,select{width:100%;background:var(--panel2);border:1px solid var(--line2);color:var(--text);border-radius:8px;padding:9px 11px;font-size:14px;outline:none}
+input:focus,select:focus{border-color:var(--accent)}
+input[type=number]{font-family:var(--mono)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.or{display:flex;align-items:center;gap:10px;margin:16px 0 4px;color:var(--gold);font-size:12px;letter-spacing:2px}
+.or:before,.or:after{content:'';flex:1;height:1px;background:var(--line2)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:18px}
+.kpi{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.kpi .k{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.kpi .v{font-family:var(--mono);font-size:22px;margin-top:6px;color:var(--accent)}
+.kpi .v.blue{color:var(--accent2)}.kpi .v.gold{color:var(--gold)}
+.kpi .s{font-size:11px;color:var(--muted);margin-top:2px;font-family:var(--mono)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{color:var(--muted);text-align:right;font-weight:600;padding:8px 10px;border-bottom:1px solid var(--line);font-size:11.5px;text-transform:uppercase;letter-spacing:.6px}
+td{padding:8px 10px;text-align:right;font-family:var(--mono);border-bottom:1px solid var(--line)}
+th:first-child,td:first-child{text-align:left;font-family:inherit}
+tr:last-child td{border-bottom:none}
+.note{font-size:11.5px;color:var(--muted);margin-top:10px}
+.badge{display:inline-block;background:#132a1f;color:var(--accent);border:1px solid #1d4d35;font-size:11px;padding:2px 8px;border-radius:6px;margin-left:8px}
+.badge.warn{background:#2a2313;color:var(--gold);border-color:#4d3f1d}
+.redem-row{display:grid;grid-template-columns:1fr 90px 36px;gap:8px;margin-top:8px;align-items:center}
+.redem-row button{background:var(--panel2);border:1px solid var(--line2);color:var(--red);border-radius:8px;height:36px;cursor:pointer}
+#addRedem{margin-top:10px;background:transparent;border:1px dashed var(--line2);color:var(--muted);padding:8px 12px;border-radius:8px;cursor:pointer;font-size:12.5px}
+#addRedem:hover{color:var(--accent);border-color:var(--accent)}
+.taxgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+footer{max-width:1240px;margin:26px auto 0;padding:0 24px;color:var(--muted);font-size:11.5px;line-height:1.7}
+h3.sec{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:20px 0 8px}
+.err{color:var(--red);font-size:13px;font-family:var(--mono);padding:8px 0}
+.presetbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.presetbar button{background:var(--panel);border:1px solid var(--line2);color:var(--muted);padding:7px 13px;border-radius:999px;cursor:pointer;font-size:12.5px}
+.presetbar button:hover{border-color:var(--accent);color:var(--accent)}
+.presetbar button.active{background:#132a1f;color:var(--accent);border-color:#1d4d35}
+</style>
+</head>
+<body>
+<header>
+  <h1>Bond<b>Lab</b> — Bond Pricer &amp; YTM Calculator</h1>
+  <span class="tag">Price ↔ Yield</span>
+  <span class="tag">Accrued Interest</span>
+  <span class="tag">Settlement Breakup</span>
+  <span class="tag">Post-Tax XIRR</span>
+  <span class="tag">4-Decimal Precision</span>
+</header>
+<div class="wrap">
+  <div class="presetbar" id="presetbar"></div>
+  <div class="grid">
+    <div>
+      <div class="card">
+        <h2><span class="dot"></span>Bond Parameters</h2>
+        <label>Coupon rate (% p.a.)</label>
+        <input type="number" id="coupon" value="9.25" step="0.01">
+        <div class="row2">
+          <div><label>Coupon frequency</label>
+            <select id="freq">
+              <option value="0">Zero coupon</option>
+              <option value="1" selected>Annual</option>
+              <option value="2">Semi-annual (G-Sec)</option>
+              <option value="4">Quarterly</option>
+              <option value="12">Monthly</option>
+            </select></div>
+          <div><label>Day count</label>
+            <select id="dc">
+              <option value="ACT/ACT" selected>ACT/ACT (street / G-Sec)</option>
+              <option value="30/360">30/360 (NCD)</option>
+            </select></div>
+        </div>
+        <div class="row2">
+          <div><label>Maturity date</label><input type="date" id="maturity" value="2032-03-20"></div>
+          <div><label>Issue date (optional)</label><input type="date" id="issue"></div>
+        </div>
+        <div class="row2">
+          <div><label>Face value (₹)</label><input type="number" id="face" value="1000" step="1"></div>
+          <div><label>Settlement date</label><input type="date" id="settle"></div>
+        </div>
+        <label>Number of bonds</label>
+        <input type="number" id="nbonds" value="10" step="1" min="1">
+        <h3 class="sec">Staggered redemption (optional)</h3>
+        <div id="redemRows"></div>
+        <button id="addRedem">+ Add redemption instalment</button>
+      </div>
+      <div class="card" style="margin-top:20px">
+        <h2><span class="dot"></span>Tax (India)</h2>
+        <div class="taxgrid">
+          <div><label>Slab rate (%)</label><input type="number" id="slab" value="30" step="1"></div>
+          <div><label>Listing</label>
+            <select id="listed"><option value="1" selected>Listed (LTCG 12.5% &gt; 12m)</option><option value="0">Unlisted</option></select></div>
+        </div>
+        <div class="note">Coupons taxed at slab. Maturity gain vs cost: LTCG 12.5% (listed, &gt;365d) else slab. Simplified model — consult a tax advisor.</div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <h2><span class="dot"></span>Quote <span class="badge" id="convBadge">…</span></h2>
+        <div class="row2">
+          <div><label>Clean price per ₹100</label><input type="number" id="priceIn" step="0.0001" placeholder="e.g. 99.25"></div>
+          <div><label>Yield to maturity (%)</label><input type="number" id="yieldIn" step="0.0001" placeholder="e.g. 9.40"></div>
+        </div>
+        <div class="or">OR — enter either, the other updates</div>
+        <div class="err" id="err"></div>
+        <div class="kpis">
+          <div class="kpi"><div class="k">Yield (nominal)</div><div class="v" id="kYield">—</div><div class="s" id="kYieldS"></div></div>
+          <div class="kpi"><div class="k">Effective annual</div><div class="v blue" id="kEff">—</div><div class="s">XIRR-equivalent</div></div>
+          <div class="kpi"><div class="k">Clean price / ₹100</div><div class="v blue" id="kClean">—</div><div class="s" id="kDirty"></div></div>
+          <div class="kpi"><div class="k">Settlement amount</div><div class="v gold" id="kSettle">—</div><div class="s" id="kSettleS"></div></div>
+        </div>
+        <h3 class="sec">Settlement breakup</h3>
+        <table id="breakup"><thead><tr><th>Component</th><th>Value</th></tr></thead><tbody></tbody></table>
+        <h3 class="sec">Risk & analytics</h3>
+        <table id="analytics"><thead><tr><th>Measure</th><th>Value</th></tr></thead><tbody></tbody></table>
+        <h3 class="sec">Yield movement</h3>
+        <table id="movement"><thead><tr><th>Yield</th><th>Clean price</th><th>Δ vs quote</th></tr></thead><tbody></tbody></table>
+        <h3 class="sec">Cashflow schedule</h3>
+        <table id="cfs"><thead><tr><th>Date</th><th>Coupon</th><th>Redemption</th><th>Total / bond</th><th>Total (all bonds)</th></tr></thead><tbody></tbody></table>
+        <h3 class="sec">Post-tax projection</h3>
+        <table id="tax"><thead><tr><th>Date</th><th>Pre-tax</th><th>Post-tax</th></tr></thead><tbody></tbody></table>
+        <div class="kpis" style="margin-top:12px">
+          <div class="kpi"><div class="k">Post-tax XIRR</div><div class="v" id="kTaxXirr">—</div><div class="s" id="kTaxXirrS"></div></div>
+          <div class="kpi"><div class="k">Current yield</div><div class="v blue" id="kCur">—</div><div class="s">coupon ÷ clean price</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<footer>
+  Methodology: street/FIMMDA convention — dirty price = Σ CFᵢ ÷ (1+y/f)^(w+k) with w = days-to-next-coupon ÷ period-days (ACT) or 30/360 year fraction; accrued per period convention; settlement includes stamp duty @0.0001% of consideration (transfer, demat). Yield solver: hybrid Newton–bisection, machine precision.
+  This tool replicates the calculators offered by IndiaBonds / Wint Wealth / SMEST / Jiraaf for analysis purposes; it is not investment advice. Verify cashflows against the ISIN master and offer documents before transacting.
+</footer>
+<script>
+const PRESETS=[
+ {id:"satin-finserv",label:"Satin Finserv A− 12.3%",coupon:12.3,freq:12,dc:"30/360",maturity:"2028-08-01",face:1000},
+ {id:"keertana",label:"Keertana BBB+ 13.2%",coupon:13.2,freq:12,dc:"30/360",maturity:"2028-05-01",face:1000},
+ {id:"earlysalary",label:"EarlySalary A− 11.2%",coupon:11.2,freq:12,dc:"30/360",maturity:"2028-07-01",face:1000},
+ {id:"nido",label:"NIDO Home A+ 10.45%",coupon:10.45,freq:1,dc:"30/360",maturity:"2027-08-01",face:1000},
+ {id:"krazybee",label:"KrazyBee A− 12.2%",coupon:12.2,freq:12,dc:"30/360",maturity:"2027-12-01",face:1000},
+ {id:"gsec",label:"G-Sec 7.10% 2034",coupon:7.1,freq:2,dc:"ACT/ACT",maturity:"2034-01-15",face:100},
+ {id:"ncd",label:"NCD 9.25% 2032",coupon:9.25,freq:1,dc:"30/360",maturity:"2032-03-20",face:1000},
+ {id:"wint",label:"Senior secured 10.75%",coupon:10.75,freq:12,dc:"30/360",maturity:"2028-06-20",face:1000}
+];
+const STAMP=0.000001;
+const $=id=>document.getElementById(id);
+const fmtINR=v=>"₹"+v.toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
+const f4=v=>v==null||!isFinite(v)?"—":v.toFixed(4);
+function P(s){const[y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d)}
+function iso(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function leap(y){return(y%4===0&&y%100!==0)||y%400===0}
+function dim(y,m){return new Date(y,m+1,0).getDate()}
+function addM(d,n){const y=d.getFullYear(),m=d.getMonth();const ny=y+Math.floor((m+n)/12),nm=((m+n)%12+12)%12;return new Date(ny,nm,Math.min(d.getDate(),dim(ny,nm)))}
+function dayDiff(a,b){return Math.round((b-a)/86400000)}
+function d360(a,b,euro){let d1=a.getDate(),d2=b.getDate();if(euro){d1=Math.min(d1,30);d2=Math.min(d2,30)}else{if(d1===31)d1=30;if(d2===31&&d1===30)d2=30}return(b.getFullYear()-a.getFullYear())*360+(b.getMonth()-a.getMonth())*30+(d2-d1)}
+function schedule(maturity,freq,issue){
+  const step=12/freq;let dates=[maturity],cur=maturity;
+  const floor=issue||addM(maturity,-960);
+  while(true){const prev=addM(cur,-step);dates.push(prev);cur=prev;if(prev<=floor)break}
+  dates.reverse();
+  if(issue){if(dates[0]<issue)dates[0]=issue;else if(dates[0]>issue)dates.unshift(issue)}
+  const per=[];for(let i=0;i<dates.length-1;i++)per.push({start:dates[i],end:dates[i+1]});
+  return per;
+}
+function buildBond(){
+  const freq=+$("freq").value,dc=$("dc").value;
+  const bond={coupon:+$("coupon").value||0,freq,dc,face:+$("face").value||1000,
+    maturity:P($("maturity").value),issue:$("issue").value?P($("issue").value):null,
+    redem:[]};
+  document.querySelectorAll(".redem-row").forEach(r=>{
+    const dv=r.querySelector(".rdate").value,pv=+r.querySelector(".rpct").value;
+    if(dv&&pv>0)bond.redem.push([P(dv),pv]);
+  });
+  if(bond.redem.length===0)bond.redem=[[bond.maturity,100]];
+  else{
+    const tot=bond.redem.reduce((s,[,p])=>s+p,0);
+    if(tot<100-1e-9)bond.redem.push([bond.maturity,100-tot]);
+    else if(tot>100+1e-9)throw"Redemption percentages exceed 100%";
+  }
+  bond.per=bond.freq?schedule(bond.maturity,bond.freq,bond.issue):[];
+  return bond;
+}
+function currentPeriod(bond,settle){
+  for(const p of bond.per)if(p.start<=settle&&settle<p.end)return p;
+  return null;
+}
+function accruedPer100(bond,settle){
+  if(!bond.coupon||!bond.freq)return[0,0];
+  const p=currentPeriod(bond,settle);if(!p)return[0,0];
+  if(bond.dc==="30/360"){const days=d360(p.start,settle);return[bond.coupon*days/360,days]}
+  const el=dayDiff(p.start,settle),tot=dayDiff(p.start,p.end);
+  return[bond.coupon/bond.freq*el/tot,el];
+}
+function cashflowsPer100(bond,settle){
+  const m=new Map();
+  if(bond.freq)for(const p of bond.per)if(p.end>settle)m.set(p.end.getTime(),(m.get(p.end.getTime())||0)+bond.coupon/bond.freq);
+  for(const[d,pct]of bond.redem)if(d>settle)m.set(d.getTime(),(m.get(d.getTime())||0)+pct);
+  return[...m.entries()].sort((a,b)=>a[0]-b[0]).map(([t,a])=>[new Date(t),a]);
+}
+function nPeriods(bond,settle,d){
+  if(bond.dc==="30/360")return Math.max(bond.freq,1)*(d360(settle,d)/360);
+  const cp=currentPeriod(bond,settle);
+  const w=dayDiff(settle,cp.end)/dayDiff(cp.start,cp.end);
+  const pays=bond.per.filter(p=>p.end>settle).map(p=>p.end);
+  const idx=pays.findIndex(pd=>pd.getTime()===d.getTime());
+  if(idx>=0)return w+idx;
+  for(let j=0;j<pays.length;j++){const nx=j+1<pays.length?pays[j+1]:bond.maturity;
+    if(pays[j]<d&&d<=nx)return w+j+(d>pays[j]?dayDiff(pays[j],d)/dayDiff(pays[j],nx):0)}
+  if(d.getTime()===bond.maturity.getTime())return w+pays.length;
+  return w+pays.length;
+}
+function priceFromYield(bond,settle,yPct){
+  const cfs=cashflowsPer100(bond,settle),i=yPct/100/Math.max(bond.freq,1);
+  let pv=0;for(const[d,a]of cfs){let n;
+    if(!bond.freq)n=dayDiff(settle,d)/365;else n=nPeriods(bond,settle,d);
+    pv+=a*Math.pow(1+i,-n)}
+  return pv;
+}
+function yieldFromPrice(bond,settle,dirty){
+  const cfs=cashflowsPer100(bond,settle),f=Math.max(bond.freq,1);
+  const ns=cfs.map(([d,a])=>!bond.freq?dayDiff(settle,d)/365:nPeriods(bond,settle,d));
+  const pv=y=>{const i=y/f;let s=0;for(let k=0;k<cfs.length;k++)s+=cfs[k][1]*Math.pow(1+i,-ns[k]);return s};
+  let lo=-0.9999,hi=100;
+  if((pv(lo)-dirty)*(pv(hi)-dirty)>0)throw"Cannot bracket yield for this price";
+  let y=0.05;
+  for(let it=0;it<200;it++){
+    const fv=pv(y)-dirty;
+    if(Math.abs(fv)<1e-13*Math.max(1,dirty))break;
+    if(fv>0)lo=Math.max(lo,y);else hi=Math.min(hi,y);
+    const d=(pv(y+1e-9)-pv(y-1e-9))/2e-9;
+    let yn=(d&&isFinite(d))?y-fv/d:(lo+hi)/2;
+    if(!(lo<yn&&yn<hi))yn=(lo+hi)/2;
+    y=yn;
+  }
+  return y*100;
+}
+function durationConvexity(bond,settle,yPct){
+  const cfs=cashflowsPer100(bond,settle),f=Math.max(bond.freq,1),i=yPct/100/f;
+  let pvT=0,w=0,c=0;
+  for(const[d,a]of cfs){const n=!bond.freq?dayDiff(settle,d)/365:nPeriods(bond,settle,d);
+    const pv=a*Math.pow(1+i,-n);pvT+=pv;w+=pv*n;c+=a*n*(n+1)*Math.pow(1+i,-n-2)}
+  return{mac:w/pvT/f,mod:w/pvT/f/(1+i),conv:c/(pvT*f*f),pv:pvT};
+}
+function xirr(cfs){
+  const t0=cfs[0][0],ts=cfs.map(([d])=>dayDiff(t0,d)/365),as=cfs.map(([,a])=>a);
+  const npv=r=>{let s=0;for(let k=0;k<as.length;k++)s+=as[k]/Math.pow(1+r,ts[k]);return s};
+  let lo=-0.999999,hi=1000;
+  if(npv(lo)*npv(hi)>0)return null;
+  let r=0.1;
+  for(let it=0;it<300;it++){const f=npv(r);if(Math.abs(f)<1e-10)break;
+    if(f>0)lo=Math.max(lo,r);else hi=Math.min(hi,r);
+    const d=(npv(r+1e-9)-npv(r-1e-9))/2e-9;
+    let rn=(d&&isFinite(d))?r-f/d:(lo+hi)/2;
+    if(!(lo<rn&&rn<hi))rn=(lo+hi)/2;
+    r=rn}
+  return r*100;
+}
+let lastEdited="price";
+function recalc(fromField){
+  const err=$("err");err.textContent="";
+  let bond;
+  try{bond=buildBond()}catch(e){err.textContent=String(e);return}
+  const settle=$("settle").value?P($("settle").value):new Date();
+  if(settle>bond.maturity){err.textContent="Settlement date is after maturity";return}
+  const[acc,accDays]=accruedPer100(bond,settle);
+  const nB=+$("nbonds").value||1;
+  let clean,dirty,y;
+  try{
+    if(fromField==="price"){
+      clean=+$("priceIn").value;
+      if(!isFinite(clean)){clearOutputs();return}
+      dirty=clean+acc;
+      y=yieldFromPrice(bond,settle,dirty);
+      $("yieldIn").value=y.toFixed(4);
+    }else{
+      y=+$("yieldIn").value;
+      if(!isFinite(y)){clearOutputs();return}
+      dirty=priceFromYield(bond,settle,y);
+      clean=dirty-acc;
+      $("priceIn").value=clean.toFixed(4);
+    }
+  }catch(e){err.textContent=String(e);clearOutputs();return}
+  const principal=dirty/100*bond.face*nB,stamp=principal*STAMP;
+  $("kYield").textContent=f4(y)+"%";
+  const eff=bond.freq?((Math.pow(1+y/100/Math.max(bond.freq,1),Math.max(bond.freq,1))-1)*100):y;
+  $("kEff").textContent=f4(eff)+"%";
+  $("kClean").textContent=f4(clean);
+  $("kDirty").textContent="dirty "+f4(dirty);
+  $("kSettle").textContent=fmtINR(principal+stamp);
+  $("kSettleS").textContent=nB.toLocaleString("en-IN")+" bond(s) · face ₹"+bond.face.toLocaleString("en-IN");
+  $("kCur").textContent=f4(bond.coupon/clean*100)+"%";
+  $("convBadge").textContent=bond.freq===0?"ZERO COUPON":(bond.dc==="30/360"?"30/360 NCD":"G-SEC STREET");
+  $("convBadge").className="badge"+(bond.maturity_is_example?" warn":"");
+  setRows("breakup",[
+    ["Clean price × face × qty",fmtINR(clean/100*bond.face*nB)],
+    ["Accrued interest (days: "+accDays+")",fmtINR(acc/100*bond.face*nB)],
+    ["Dirty price per ₹100",f4(dirty)],
+    ["Principal consideration",fmtINR(principal)],
+    ["Stamp duty @0.0001%",fmtINR(stamp)],
+    ["Total settlement amount",fmtINR(principal+stamp)]
+  ]);
+  let dc=null;
+  try{dc=durationConvexity(bond,settle,y)}catch(e){}
+  if(dc)setRows("analytics",[
+    ["Macaulay duration (yrs)",f4(dc.mac)],
+    ["Modified duration",f4(dc.mod)],
+    ["Convexity",f4(dc.conv)],
+    ["Current yield",f4(bond.coupon/clean*100)+"%"],
+    ["Effective annual yield",f4(eff)+"%"]
+  ]);
+  const mv=[];for(const s of[0,25,50,100,-25,-50,-100]){const yy=y+s/100;if(yy<=-99)continue;
+    mv.push({y:yy,p:priceFromYield(bond,settle,yy)-acc})}
+  mv.sort((a,b)=>b.y-a.y);
+  setRows("movement",mv.map(r=>[f4(r.y)+"%",f4(r.p),(r.p-clean>=0?"+":"")+f4(r.p-clean)]));
+  const cfs=cashflowsPer100(bond,settle);
+  const scale=bond.face/100*nB;
+  setRows("cfs",cfs.map(([d,a])=>{
+    const red=bond.redem.filter(([rd])=>rd.getTime()===d.getTime()).reduce((s,[,p])=>s+p,0);
+    return[iso(d),f4(a-red),f4(red),f4(a),fmtINR(a*scale)];
+  }));
+  const slab=+$("slab").value/100||0,listed=+$("listed").value==="1";
+  const cost=dirty/100*bond.face*nB;
+  const hold=dayDiff(settle,bond.maturity);
+  const cg=listed&&hold>365?0.125:slab;
+  const redAtMat=bond.redem.filter(([rd])=>rd.getTime()===bond.maturity.getTime()).reduce((s,[,p])=>s+p,0)*scale;
+  const gain=Math.max(redAtMat-cost,0);
+  const taxCfs=[[-cost,settle]];
+  for(const[d,a]of cfs){
+    const gross=a*scale;
+    const couponPart=bond.freq?bond.coupon/bond.freq*scale:0;
+    let net=gross-couponPart*slab;
+    if(d.getTime()===bond.maturity.getTime())net=gross-gain*cg;
+    taxCfs.push([net,d]);
+  }
+  setRows("tax",taxCfs.map(([a,d],i)=>[i===0?iso(d)+" (cost)":iso(d),i===0?fmtINR(-a):fmtINR(cfs[i-1][1]*scale),fmtINR(a)]));
+  const tx=xirr(taxCfs.map(([a,d])=>[d,a]));
+  $("kTaxXirr").textContent=tx==null?"—":f4(tx)+"%";
+  $("kTaxXirrS").textContent="slab "+(slab*100).toFixed(0)+"% · "+(listed?"LTCG 12.5%":"unlisted");
+}
+function setRows(id,rows){const tb=$(id).querySelector("tbody");tb.innerHTML=rows.map(r=>"<tr>"+r.map(c=>"<td>"+c+"</td>").join("")+"</tr>").join("")}
+function clearOutputs(){["kYield","kEff","kClean","kSettle","kTaxXirr","kCur"].forEach(i=>$(i).textContent="—");
+  ["breakup","analytics","movement","cfs","tax"].forEach(i=>$(i).querySelector("tbody").innerHTML="")}
+["coupon","freq","dc","maturity","issue","face","settle","nbonds","slab","listed"].forEach(id=>{
+  $(id).addEventListener("input",()=>recalc(lastEdited));
+  $(id).addEventListener("change",()=>recalc(lastEdited));
+});
+$("priceIn").addEventListener("input",()=>{lastEdited="price";recalc("price")});
+$("yieldIn").addEventListener("input",()=>{lastEdited="yield";recalc("yield")});
+$("addRedem").addEventListener("click",()=>{
+  const div=document.createElement("div");div.className="redem-row";
+  div.innerHTML='<input type="date" class="rdate"><input type="number" class="rpct" placeholder="% face" min="1" max="100"><button type="button">✕</button>';
+  div.querySelector("button").addEventListener("click",()=>{div.remove();recalc(lastEdited)});
+  div.querySelectorAll("input").forEach(inp=>inp.addEventListener("input",()=>recalc(lastEdited)));
+  $("redemRows").appendChild(div);
+});
+const bar=$("presetbar");
+PRESETS.forEach(p=>{
+  const b=document.createElement("button");b.textContent=p.label;
+  b.addEventListener("click",()=>{
+    bar.querySelectorAll("button").forEach(x=>x.classList.remove("active"));b.classList.add("active");
+    $("coupon").value=p.coupon;$("freq").value=p.freq;$("dc").value=p.dc;$("maturity").value=p.maturity;$("face").value=p.face;
+    $("yieldIn").value=p.coupon.toFixed(4);lastEdited="yield";recalc("yield");
+  });
+  bar.appendChild(b);
+});
+(function init(){
+  const t=new Date();$("settle").value=iso(t);
+  $("yieldIn").value="9.2500";lastEdited="yield";recalc("yield");
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block title %}{{ b.security_name }} | BondLab{% endblock %}
+{% block body %}
+<div class="wrap">
+  <div class="crumb"><a href="{{ url_for('index') }}">Offers</a> <span>/</span> <span>{{ b.security_name }}</span> <span class="minibadge">{{ b.tiny_link }}</span></div>
+
+  <div class="offer-head">
+    <div>
+      <h1>{{ b.security_name }}</h1>
+      <div class="meta">
+        <span class="badge blue">{{ b.type or "Bond" }}</span>
+        <span class="badge gold">{{ b.credit_rating or "NR" }}</span>
+        <span class="badge muted">{{ b.issuer_category or "" }}</span>
+        <span class="badge muted">ISIN {{ b.isin or "" }}</span>{% if b.isin %}<button type="button" class="copybtn" data-copy="{{ b.isin }}" aria-label="Copy ISIN">Copy</button>{% endif %}
+        <span class="badge muted">{{ b.coupon_frequency }}</span>
+      </div>
+    </div>
+    <div class="yieldbox">
+      <b>{{ "%.4f"|format(b.xirr_default or b.ytm_default or b.offer_yield or 0) }}%</b>
+      <span>investor YTM (XIRR) at offer price<br>market BEY {{ "%.2f"|format(b.ytm_default or 0) }}% · price ₹{{ "%.4f"|format(b.offer_price or 0) }} · min ₹{{ "{:,.0f}".format(b.min_investment or 0) }}</span>
+    </div>
+  </div>
+
+  <div class="offer-grid">
+    <div class="card">
+      <h2><span class="dot"></span>Security Details</h2>
+      <div class="kv">
+        <div class="k">Coupon rate</div><div class="v">{{ "%.4f"|format(b.coupon) }}% p.a.</div>
+        <div class="k">Coupon frequency</div><div class="v">{{ b.coupon_frequency }}</div>
+        <div class="k">Face value</div><div class="v">₹{{ "{:,.2f}".format(b.face_value) }}</div>
+        <div class="k">Final maturity / call</div><div class="v">{{ b.maturity }}</div>
+        <div class="k">Residual period</div><div class="v">{{ b.residual or "" }}</div>
+        <div class="k">Credit rating</div><div class="v">{{ b.credit_rating or "" }}</div>
+        <div class="k">Issuer category</div><div class="v">{{ b.issuer_category or "" }}</div>
+        <div class="k">Day count</div><div class="v">{{ b.day_count_used }}</div>
+        {% if b.issue_date %}<div class="k">Issue / Allotment date</div><div class="v">{{ b.issue_date }}</div>{% endif %}
+        {% if b.first_coupon %}<div class="k">First coupon date</div><div class="v">{{ b.first_coupon }}</div>{% endif %}
+        {% if b.next_ip_date %}<div class="k">Next interest payment</div><div class="v">{{ b.next_ip_date }}</div>{% endif %}
+        {% if b.last_ip_date %}<div class="k">Last interest payment</div><div class="v">{{ b.last_ip_date }}</div>{% endif %}
+        <div class="k">Offer yield</div><div class="v">{{ "%.4f"|format(b.offer_yield or 0) }}%</div>
+        <div class="k">Offer price</div><div class="v">₹{{ "%.4f"|format(b.offer_price or 0) }}</div>
+        <div class="k">Min investment</div><div class="v">₹{{ "{:,.0f}".format(b.min_investment or 0) }}</div>
+        <div class="k">Tiny URL</div><div class="v"><a href="{{ b.tiny_url or b.tiny_link }}" style="text-decoration:underline;text-decoration-color:var(--gold-deep);text-underline-offset:3px">{{ b.tiny_url or b.tiny_link }}</a></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <h2><span class="dot"></span>Calculator
+          <span class="badge" style="margin-left:auto">{{ b.day_count_used }} · {{ "freq %s"|format(b.freq_num) }}</span>
+        </h2>
+        <div class="row3">
+          <div><label>Clean price (per ₹100)</label><input type="number" id="priceIn" step="0.0001" value="{{ "%.4f"|format(b.offer_price) }}" inputmode="decimal"></div>
+          <div><label>Yield to maturity (%)</label><input type="number" id="yieldIn" step="0.0001" inputmode="decimal"></div>
+          <div><label>Settlement date</label><input type="date" id="settleIn" value="{{ settle_default }}"></div>
+        </div>
+        <div class="or">enter either price or yield; the other updates</div>
+        <div class="row2">
+          <div><label>Quantity (bonds)</label><input type="number" id="qtyIn" value="10" min="1" step="1" inputmode="numeric"></div>
+          <div style="align-self:end;padding-bottom:2px"><div class="err" id="err"></div></div>
+        </div>
+        <div class="kpis" style="margin-top:18px">
+          <div class="kpi accent"><div class="k">Investor YTM</div><div class="v" id="kYtm"></div><div class="s" id="kYtmS"></div></div>
+          <div class="kpi"><div class="k">Clean price</div><div class="v" id="kClean"></div><div class="s" id="kDirty"></div></div>
+          <div class="kpi"><div class="k">Accrued</div><div class="v" id="kAcc"></div><div class="s" id="kAccS"></div></div>
+          <div class="kpi"><div class="k">Settlement total</div><div class="v" id="kTotal"></div><div class="s" id="kTotalS"></div></div>
+        </div>
+        <div class="table-scroll"><table id="metrics"><thead><tr><th>Measure</th><th style="text-align:right">Value</th></tr></thead><tbody></tbody></table></div>
+        <div class="sec-label">Yield sensitivity</div>
+        <div class="table-scroll"><table id="movement"><thead><tr><th>Yield</th><th style="text-align:right">Clean price</th><th style="text-align:right">Δ</th></tr></thead><tbody></tbody></table></div>
+      </div>
+
+      <div class="card" style="margin-top:20px">
+        <h2><span class="dot"></span>Generate Client Quote Sheet <span class="badge muted" style="margin-left:auto">Excel + PDF</span></h2>
+        <form id="quoteForm">
+          <div class="row2">
+            <div><label>Client name</label><input type="text" id="qName" placeholder="e.g. Ramesh Iyer" required></div>
+            <div><label>Contact (mobile/email)</label><input type="text" id="qContact" placeholder="+91"></div>
+          </div>
+          <div class="row3">
+            <div><label>Quantity</label><input type="number" id="qQty" value="10" min="1" step="1" inputmode="numeric"></div>
+            <div><label>Price per ₹100</label><input type="number" id="qPrice" step="0.0001" value="{{ "%.4f"|format(b.offer_price) }}" inputmode="decimal"></div>
+            <div><label>Price basis</label>
+              <select id="qPriceType"><option value="clean" selected>Clean price (excl. accrued)</option><option value="dirty">Dirty / AMO price (incl. accrued)</option></select></div>
+          </div>
+          <div class="row3">
+            <div><label>Settlement date</label><input type="date" id="qSettle" value="{{ settle_default }}"></div>
+            <div><label>Tax slab (%)</label><input type="number" id="qSlab" value="30" min="0" max="50" step="0.1" inputmode="decimal"></div>
+            <div><label>Listing</label>
+              <select id="qListed"><option value="1" selected>Listed (LTCG 12.5% over 12m)</option><option value="0">Unlisted</option></select></div>
+          </div>
+          <div><label>Notes (optional)</label><input type="text" id="qNotes" placeholder="Internal note"></div>
+          <div style="margin-top:18px"><button class="btn primary" type="submit" id="quoteBtn">Generate Quote Sheet</button></div>
+        </form>
+        <div class="quote-result" id="quoteResult" style="display:none">
+          <h3 id="quoteNo"></h3>
+          <div class="row2" style="margin-top:14px">
+            <a class="btn" id="dlXlsx" href="#" download>Download Excel (.xlsx)</a>
+            <a class="btn" id="dlPdf" href="#" download>Download PDF</a>
+          </div>
+          <div class="table-scroll" style="margin-top:14px;background:var(--paper)">
+            <table id="quoteSummary"><thead><tr><th>Component</th><th style="text-align:right">Value</th></tr></thead><tbody></tbody></table>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:20px">
+        <h2><span class="dot"></span>Cashflow Schedule</h2>
+        <div class="table-scroll">
+          <table id="cfs"><thead><tr><th>Date</th><th style="text-align:right">Coupon/bond</th><th style="text-align:right">Redemption/bond</th><th style="text-align:right">Total/bond</th><th style="text-align:right">Total (qty)</th></tr></thead><tbody></tbody></table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script id="bond-data" type="application/json">{{ b|tojson }}</script>
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+<script>
+(function () {
+  function copyText(t, btn) {
+    function done() { if (btn) { btn.classList.add("copied"); btn.textContent = "Copied"; setTimeout(function () { btn.classList.remove("copied"); btn.textContent = "Copy"; }, 1500); } }
+    function fallback() {
+      var ta = document.createElement("textarea");
+      ta.value = t; ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand("copy"); done(); } catch (e) {}
+      document.body.removeChild(ta);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done, fallback);
+    else fallback();
+  }
+  document.querySelectorAll(".copybtn").forEach(function (btn) {
+    btn.addEventListener("click", function () { copyText(btn.getAttribute("data-copy") || "", btn); });
+  });
+})();
+</script>
+{% endblock %}

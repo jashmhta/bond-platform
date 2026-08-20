@@ -1,0 +1,528 @@
+{% extends "base.html" %}
+{% block title %}Bond Calculator | BondLab{% endblock %}
+{% block body %}
+<div class="wrap">
+  <div class="crumb"><a href="{{ url_for('index') }}">Offers</a> <span>/</span> <span>Calculator</span></div>
+
+  <section class="hero" style="padding-bottom:26px">
+    <span class="eyebrow">Machine-precision bond mathematics</span>
+    <h1>Calculator</h1>
+    <p>Price to yield on any bond. Pick one from the inventory by ISIN or name, or key in a new bond
+       using the same headers as the Excel template. Every number is computed server-side on the
+       BondLab engine (hybrid Newton-bisection, machine precision).</p>
+  </section>
+
+  <div class="card">
+    <h2><span class="dot"></span>Select a bond</h2>
+    <div class="row2">
+      <div>
+        <label>Bond</label>
+        <select id="bondSelect">
+          <option value="">New bond / manual entry</option>
+          {% for b in bonds %}
+          <option value="{{ b.isin or '' }}">{{ b.security_name }}{% if b.isin %} · {{ b.isin }}{% endif %}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label>Or type ISIN</label>
+        <div class="row2" style="gap:10px">
+          <input type="text" id="isinIn" maxlength="12" placeholder="INE0ABC12345" list="isinList" style="text-transform:uppercase">
+          <datalist id="isinList">
+            {% for b in bonds %}{% if b.isin %}<option value="{{ b.isin }}">{{ b.security_name }}</option>{% endif %}{% endfor %}
+          </datalist>
+          <button class="btn" type="button" id="isinLoadBtn" style="white-space:nowrap">Load</button>
+        </div>
+      </div>
+    </div>
+    <div class="err" id="loadErr" style="margin-top:8px"></div>
+  </div>
+
+  <form id="bondForm" class="card" style="margin-top:20px" autocomplete="off">
+    <h2><span class="dot"></span>Bond details <span class="badge muted">Excel-template headers</span></h2>
+    <div class="row2">
+      <div><label>Security Name *</label><input name="security_name" id="fSecurityName" placeholder="e.g. Satin Finserv NCD Series IV"></div>
+      <div><label>ISIN No. (12 chars)</label><div style="display:flex;gap:8px;align-items:center"><input name="isin" id="fIsin" maxlength="12" placeholder="INE0ABC12345" style="flex:1;min-width:0"><button type="button" class="copybtn" id="copyIsin" aria-label="Copy ISIN">Copy</button></div></div>
+    </div>
+    <div class="row3">
+      <div><label>Coupon Rate (%) *</label><input type="number" name="coupon" id="fCoupon" step="0.0001" inputmode="decimal"></div>
+      <div><label>Coupon Frequency *</label>
+        <select name="coupon_frequency" id="fFreq">
+          <option value="Annual">Annual</option>
+          <option value="Semi-Annual">Semi-Annual</option>
+          <option value="Quarterly">Quarterly</option>
+          <option value="Monthly">Monthly</option>
+          <option value="Zero Coupon">Zero Coupon</option>
+        </select></div>
+      <div><label>Face Value *</label><input type="number" name="face_value" id="fFace" step="any" min="1" inputmode="numeric"></div>
+    </div>
+    <div class="row3">
+      <div><label>Maturity *</label><input type="date" name="maturity" id="fMaturity"></div>
+      <div><label>Call Date</label><input type="date" name="call_date" id="fCall"></div>
+      <div><label>Put Date</label><input type="date" name="put_date" id="fPut"></div>
+    </div>
+    <div class="row3">
+      <div><label>Bond Type</label><input name="type" id="fType" placeholder="NCD / G-Sec / SDL / ZCB"></div>
+      <div><label>Issuer Category</label><input name="issuer_category" id="fCategory" placeholder="NBFC / Bank / Corporate / Government"></div>
+      <div><label>Credit Rating</label><input name="credit_rating" id="fRating" placeholder="AA (Crisil)"></div>
+    </div>
+    <div class="row3">
+      <div><label>Offer Yield (%)</label><input type="number" name="offer_yield" id="fOfferYield" step="0.0001" inputmode="decimal"></div>
+      <div><label>Offer Price (per ₹100)</label><input type="number" name="offer_price" id="fOfferPrice" step="0.0001" inputmode="decimal"></div>
+      <div><label>Min Investment (₹ Lacs multiples)</label><input name="min_investment" id="fMinInv" placeholder="1 (= ₹1,00,000)"></div>
+    </div>
+    <div class="row3">
+      <div><label>Residual Period (auto)</label><input id="fResidual" readonly placeholder="computed by engine"></div>
+      <div><label>Tiny URL</label><input id="fTiny" readonly placeholder="auto for stored bonds"></div>
+    </div>
+
+    <details class="adv" style="margin-top:16px">
+      <summary>Advanced (dates, conventions &amp; metadata)</summary>
+      <div class="row3" style="margin-top:10px">
+        <div><label>Issue / Allotment date</label><input type="date" name="issue_date" id="fIssue"></div>
+        <div><label>First coupon date</label><input type="date" name="first_coupon" id="fFirstCoupon"></div>
+        <div><label>Day count convention</label>
+          <select name="day_count" id="fDayCount">
+            <option value="">Auto (G-Sec→ACT/ACT, else 30/360)</option>
+            {% for d in ["ACT/ACT","30/360","30E/360","ACT/365F","ACT/365L","ACT/365Y"] %}<option value="{{ d }}">{{ d }}</option>{% endfor %}
+          </select></div>
+      </div>
+      <div class="row3">
+        <div><label>Coupon type</label><input name="coupon_type" id="fCouponType" placeholder="Fixed / Floating"></div>
+        <div><label>Rating agency</label><input name="rating_agency" id="fRatingAgency" placeholder="Crisil / Icra / CARE"></div>
+        <div><label>Guarantee</label><input name="guarantee" id="fGuarantee"></div>
+      </div>
+      <div class="row3">
+        <div><label>Listing</label><input name="listing" id="fListing" placeholder="BSE / NSE"></div>
+        <div><label>Issue size</label><input name="issue_size" id="fIssueSize"></div>
+        <div><label>Mode of issuance</label><input name="mode" id="fMode"></div>
+      </div>
+      <div class="row3">
+        <div><label>Sector</label><input name="sector" id="fSector"></div>
+        <div><label>Series / Tranche</label><input name="series" id="fSeries"></div>
+        <div><label>Taxable</label><input name="taxable" id="fTaxable" placeholder="Yes / No / Tax-free"></div>
+      </div>
+      <div><label>Staggered redemption schedule (date:percent, e.g. 2026-10-26:25, 2027-04-26:25)</label>
+        <input name="redemptions" id="fRedemptions" placeholder="2026-10-26:25, 2027-04-26:25, 2027-10-26:25, 2028-04-26:25"></div>
+      <div style="margin-top:10px"><label>Notes</label><textarea name="notes" id="fNotes"></textarea></div>
+    </details>
+  </form>
+
+  <div class="card" style="margin-top:20px">
+    <h2><span class="dot"></span>Compute
+      <span class="badge" style="margin-left:auto" id="engineBadge">engine: street conventions</span>
+    </h2>
+    <div class="seg" role="radiogroup" aria-label="Calculation mode">
+      <label><input type="radio" name="mode" value="price_to_yield" checked><span>Price → Yield</span></label>
+      <label><input type="radio" name="mode" value="yield_to_price"><span>Yield → Price</span></label>
+    </div>
+    <div class="row3" style="margin-top:16px">
+      <div id="rowPrice"><label>Clean price (per ₹100)</label><input type="number" id="calcPrice" step="0.0001" value="100" inputmode="decimal"></div>
+      <div id="rowYield" style="display:none"><label>Yield to maturity (%)</label><input type="number" id="calcYield" step="0.0001" value="9" inputmode="decimal"></div>
+      <div><label>Settlement date</label><input type="date" id="calcSettle" value="{{ settle_default }}"></div>
+      <div><label>Investment amount (₹)</label><input type="number" id="calcAmount" value="100000" min="1" step="any" inputmode="numeric"></div>
+    </div>
+    <div class="err" id="calcErr" style="margin-top:10px"></div>
+    <div style="margin-top:16px">
+      <button class="btn primary" type="button" id="calcBtn">Compute</button>
+      <span class="note" style="margin-left:12px" id="calcHint"></span>
+    </div>
+  </div>
+
+  <div id="results" style="display:none">
+    <div class="card" style="margin-top:20px">
+      <h2><span class="dot"></span>Results <span class="badge muted" id="resBondBadge" style="margin-left:auto"></span></h2>
+      <div class="kpis" style="margin-top:14px">
+        <div class="kpi accent"><div class="k" id="headK">YTM</div><div class="v" id="rHead"></div><div class="s" id="rHeadS"></div></div>
+        <div class="kpi"><div class="k">Clean price</div><div class="v" id="rClean"></div><div class="s" id="rDirty"></div></div>
+        <div class="kpi"><div class="k">Accrued</div><div class="v" id="rAcc"></div><div class="s" id="rAccS"></div></div>
+        <div class="kpi"><div class="k">Settlement total</div><div class="v" id="rTotal"></div><div class="s" id="rTotalS"></div></div>
+        <div class="kpi"><div class="k">XIRR (pre-tax)</div><div class="v" id="rXirr"></div><div class="s" id="rXirrS"></div></div>
+        <div class="kpi"><div class="k">Bonds</div><div class="v" id="rBonds"></div><div class="s" id="rBondsS"></div></div>
+      </div>
+      <div class="table-scroll" style="margin-top:16px"><table id="metrics"><thead><tr><th>Measure</th><th style="text-align:right">Value</th></tr></thead><tbody></tbody></table></div>
+      <div id="ytcw" class="note" style="margin-top:10px"></div>
+      <div class="sec-label">Cashflow schedule (per bond / for investment)</div>
+      <div class="table-scroll"><table id="cfs"><thead><tr><th>Date</th><th style="text-align:right">Coupon</th><th style="text-align:right">Redemption</th><th style="text-align:right">Total/bond</th><th style="text-align:right">Total (investment)</th></tr></thead><tbody></tbody></table></div>
+      <div class="sec-label">Yield sensitivity (clean price per ₹100)</div>
+      <div class="table-scroll"><table id="movement"><thead><tr><th>Yield</th><th style="text-align:right">Clean price</th><th style="text-align:right">Δ</th></tr></thead><tbody></tbody></table></div>
+
+      <div class="or">Client quote sheet</div>
+      <form id="quoteForm">
+        <div class="row2">
+          <div><label>Client name</label><input type="text" id="qName" placeholder="e.g. Ramesh Iyer" required></div>
+          <div><label>Contact (mobile/email)</label><input type="text" id="qContact" placeholder="+91"></div>
+        </div>
+        <div><label>Notes (optional)</label><input type="text" id="qNotes" placeholder="Internal note"></div>
+        <div style="margin-top:18px"><button class="btn primary" type="submit" id="quoteBtn">Generate Quote Sheet</button></div>
+      </form>
+      <div class="quote-result" id="quoteResult" style="display:none">
+        <h3 id="quoteNo"></h3>
+        <div class="row2" style="margin-top:14px">
+          <a class="btn" id="dlXlsx" href="#" download>Download Excel (.xlsx)</a>
+          <a class="btn" id="dlPdf" href="#" download>Download PDF</a>
+        </div>
+        <div class="table-scroll" style="margin-top:14px;background:var(--paper)">
+          <table id="quoteSummary"><thead><tr><th>Component</th><th style="text-align:right">Value</th></tr></thead><tbody></tbody></table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script id="bond-list" type="application/json">{{ bonds|tojson }}</script>
+<script>
+(function () {
+  "use strict";
+  var BONDS = JSON.parse(document.getElementById("bond-list").textContent);
+  var F = function (id) { return document.getElementById(id); };
+  var loadedFullPrice = null;
+  var priceTouched = false;
+  var copyText = function (t, btn) {
+    var done = function () {
+      if (btn) { btn.classList.add("copied"); btn.textContent = "Copied"; setTimeout(function () { btn.classList.remove("copied"); btn.textContent = "Copy"; }, 1500); }
+    };
+    var fallback = function () {
+      var ta = document.createElement("textarea");
+      ta.value = t; ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand("copy"); done(); } catch (e) {}
+      document.body.removeChild(ta);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done, fallback);
+    else fallback();
+  };
+  var fmt = function (n, d) {
+    d = d === undefined ? 6 : d;
+    if (n === null || n === undefined || isNaN(n)) return "";
+    return Number(n).toLocaleString("en-IN", { maximumFractionDigits: d, minimumFractionDigits: Math.min(d, 4) });
+  };
+  var inr = function (n, d) { return "\u20B9" + fmt(n, d === undefined ? 2 : d); };
+
+  function bondByIsin(isin) {
+    if (!isin) return null;
+    var i = isin.trim().toUpperCase();
+    for (var k = 0; k < BONDS.length; k++) {
+      if (BONDS[k].isin && BONDS[k].isin.toUpperCase() === i) return BONDS[k];
+    }
+    return null;
+  }
+
+  function fillForm(b) {
+    if (!b) return;
+    var set = function (id, v) { var el = F(id); if (el) el.value = (v === null || v === undefined) ? "" : v; };
+    set("fSecurityName", b.security_name);
+    set("fIsin", b.isin);
+    set("fCoupon", b.coupon);
+    set("fFreq", b.coupon_frequency || "Annual");
+    set("fFace", b.face_value);
+    set("fMaturity", b.maturity);
+    set("fType", b.type);
+    set("fCategory", b.issuer_category);
+    set("fRating", b.credit_rating);
+    set("fOfferYield", b.offer_yield);
+    set("fOfferPrice", b.offer_price);
+    set("fMinInv", b.min_investment ? (b.min_investment >= 10000 ? Math.round(b.min_investment / 100000 * 1000) / 1000 : b.min_investment) : "");
+    set("fResidual", b.residual || "");
+    set("fTiny", b.tiny_link || "");
+    set("fIssue", b.issue_date);
+    set("fFirstCoupon", b.first_coupon);
+    set("fCall", b.call_date);
+    set("fPut", b.put_date);
+    set("fDayCount", b.day_count || "");
+    set("fCouponType", b.coupon_type);
+    set("fRatingAgency", b.rating_agency);
+    set("fGuarantee", b.guarantee);
+    set("fListing", b.listing);
+    set("fIssueSize", b.issue_size);
+    set("fMode", b.mode);
+    set("fSector", b.sector);
+    set("fSeries", b.series);
+    set("fTaxable", b.taxable);
+    set("fNotes", b.notes);
+    var red = (b.redemptions || []).map(function (r) {
+      return Array.isArray(r) ? (r[0] + ":" + r[1]) : (r.date + ":" + r.pct);
+    }).join(", ");
+    set("fRedemptions", red);
+    if (b.offer_price) {
+      F("calcPrice").value = Number(b.offer_price).toFixed(4);
+      loadedFullPrice = Number(b.offer_price);
+    }
+  }
+
+  function collectBond() {
+    var g = function (id) { var el = F(id); return el ? el.value.trim() : ""; };
+    var red = [];
+    g("fRedemptions").split(/[;,]/).forEach(function (part) {
+      part = part.trim();
+      if (!part) return;
+      var bits = part.split(":");
+      if (bits.length === 2 && bits[0] && bits[1]) {
+        var p = parseFloat(bits[1]);
+        if (!isNaN(p)) red.push([bits[0].trim(), p]);
+      }
+    });
+    return {
+      security_name: g("fSecurityName"),
+      isin: g("fIsin").toUpperCase() || null,
+      coupon: g("fCoupon"),
+      coupon_frequency: g("fFreq") || "Annual",
+      face_value: g("fFace"),
+      maturity: g("fMaturity"),
+      type: g("fType"),
+      issuer_category: g("fCategory"),
+      credit_rating: g("fRating"),
+      offer_yield: g("fOfferYield"),
+      offer_price: g("fOfferPrice"),
+      min_investment: g("fMinInv"),
+      issue_date: g("fIssue"),
+      first_coupon: g("fFirstCoupon"),
+      call_date: g("fCall"),
+      put_date: g("fPut"),
+      day_count: g("fDayCount"),
+      coupon_type: g("fCouponType"),
+      rating_agency: g("fRatingAgency"),
+      guarantee: g("fGuarantee"),
+      listing: g("fListing"),
+      issue_size: g("fIssueSize"),
+      mode: g("fMode"),
+      sector: g("fSector"),
+      series: g("fSeries"),
+      taxable: g("fTaxable"),
+      notes: g("fNotes"),
+      redemptions: red.length ? red : null
+    };
+  }
+
+  function loadByIsin() {
+    var v = F("isinIn").value;
+    var b = bondByIsin(v);
+    var err = F("loadErr");
+    if (!b) {
+      err.textContent = v ? "ISIN not found in inventory; form stays manual (new bond mode)." : "";
+      return;
+    }
+    err.textContent = "";
+    F("bondSelect").value = b.isin || "";
+    fillForm(b);
+    compute();
+  }
+
+  F("isinLoadBtn").addEventListener("click", loadByIsin);
+  F("copyIsin").addEventListener("click", function () { copyText(F("fIsin").value.trim(), this); });
+  F("isinIn").addEventListener("change", loadByIsin);
+  F("bondSelect").addEventListener("change", function () {
+    var b = bondByIsin(this.value);
+    if (b) {
+      F("loadErr").textContent = "";
+      F("isinIn").value = b.isin || "";
+      fillForm(b);
+      compute();
+    } else {
+      F("isinIn").value = "";
+    }
+  });
+
+  function modeState() {
+    var y2p = document.querySelector("input[name=mode]:checked").value === "yield_to_price";
+    F("rowPrice").style.display = y2p ? "none" : "";
+    F("rowYield").style.display = y2p ? "" : "none";
+  }
+  document.querySelectorAll("input[name=mode]").forEach(function (r) {
+    r.addEventListener("change", modeState);
+  });
+
+  function rowsHtml(rows) {
+    return rows.map(function (r) {
+      var cells = r.map(function (c) {
+        return typeof c === "string" ? c : fmt(c);
+      });
+      return "<tr><td>" + cells.slice(0, -1).join("</td><td>") + "</td><td style='text-align:right'>" + cells[cells.length - 1] + "</td></tr>";
+    }).join("");
+  }
+
+  var lastQty = 1;
+  var lastResult = null;
+
+  function compute() {
+    var err = F("calcErr");
+    err.textContent = "";
+    F("calcHint").textContent = "computing";
+    var y2p = document.querySelector("input[name=mode]:checked").value === "yield_to_price";
+    var cleanPrice = parseFloat(F("calcPrice").value);
+    if (!y2p && !priceTouched && loadedFullPrice != null) cleanPrice = loadedFullPrice;
+    var amount = parseFloat(F("calcAmount").value) || 0;
+    var settle = F("calcSettle").value;
+    var face = parseFloat(collectBond().face_value) || 1000;
+    var call = function (q, cb) {
+      fetch("/api/calc_full", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mode: y2p ? "yield_to_price" : "price_to_yield",
+          price: cleanPrice,
+          yield: parseFloat(F("calcYield").value),
+          settle: settle,
+          qty: q,
+          slab: 30,
+          listed: "1",
+          price_basis: "clean",
+          yield_basis: "xirr",
+          bond: collectBond()
+        })
+      }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+        .then(function (res) {
+          F("calcHint").textContent = "";
+          if (!res.ok) { err.textContent = res.j.error || "compute failed"; return; }
+          cb(res.j);
+        })
+        .catch(function (e) { F("calcHint").textContent = ""; err.textContent = String(e); });
+    };
+    call(1, function (r) {
+      var qty = 1;
+      if (amount > 0) {
+        var perBond = r.dirty_price / 100 * face;
+        qty = perBond > 0 ? amount / perBond : 1;
+      }
+      lastQty = qty;
+      call(qty, function (r2) { lastResult = r2; render(r2); });
+    });
+  }
+
+  function render(r) {
+    F("results").style.display = "";
+    F("resBondBadge").textContent = r.bond.security_name + (r.bond.isin ? " · " + r.bond.isin : "");
+    var y2p = document.querySelector("input[name=mode]:checked").value === "yield_to_price";
+    if (y2p) {
+      F("headK").textContent = "Clean price";
+      F("rHead").textContent = fmt(r.clean_price, 4);
+      F("rHeadS").textContent = "for investor YTM " + fmt(r.xirr_pre, 4) + "%";
+    } else {
+      F("headK").textContent = "Investor YTM";
+      F("rHead").textContent = fmt(r.xirr_pre, 4) + "%";
+      F("rHeadS").textContent = "market BEY " + fmt(r.ytm, 4) + "%";
+    }
+    F("rClean").textContent = fmt(r.clean_price, 4);
+    F("rDirty").textContent = "dirty " + fmt(r.dirty_price, 4);
+    F("rAcc").textContent = fmt(r.accrued_per100, 4);
+    F("rAccS").textContent = r.accrued_days + " days · ₹" + fmt(r.accrued_per100 / 100 * r.bond.face_value, 2) + " /bond";
+    F("rTotal").textContent = inr(r.total, 2);
+    F("rTotalS").textContent = "principal " + inr(r.principal, 2) + " · stamp " + inr(r.stamp, 6);
+    F("rXirr").textContent = fmt(r.xirr_pre, 4) + "%";
+    F("rXirrS").textContent = "post-tax " + fmt(r.xirr_post, 4) + "%";
+    F("rBonds").textContent = fmt(lastQty, 2);
+    F("rBondsS").textContent = "× ₹" + Number(r.bond.face_value).toLocaleString("en-IN") + " FV";
+    var b = r.bond;
+    F("fResidual").value = b.residual || "";
+    F("engineBadge").textContent = b.day_count + " · freq " + b.freq_num + " · basis " + (b.interest_basis || "");
+
+    var metrics = [
+      ["Investor YTM (XIRR)", fmt(r.xirr_pre, 4) + "%"],
+      ["Market BEY (YTM)", fmt(r.ytm, 4) + "%"],
+      ["Effective annual yield", fmt(r.effective_annual, 4) + "%"],
+      ["Current yield", fmt(r.current_yield, 4) + "%"],
+      ["Macaulay duration", fmt(r.macaulay, 4) + " yrs"],
+      ["Modified duration", fmt(r.modified, 4)],
+      ["Convexity", fmt(r.convexity, 4)],
+      ["XIRR (post-tax)", fmt(r.xirr_post, 4) + "%"],
+      ["Accrued interest /100", fmt(r.accrued_per100, 6) + " (" + r.accrued_days + " days)"],
+      ["Clean price /100", fmt(r.clean_price, 6)],
+      ["Dirty price /100", fmt(r.dirty_price, 6)],
+      ["Residual period", b.residual || ""],
+      ["Day count convention", b.day_count],
+      ["Coupon frequency", b.coupon_frequency + " (" + b.freq_num + "×)"],
+      ["Interest basis", b.interest_basis || ""],
+      ["Compounding", b.compounding + "×"],
+      ["Redemption schedule", b.redemptions_list.map(function (x) { return x[0] + ":" + x[1] + "%"; }).join(", ") || "terminal 100%"],
+      ["xNPV at XIRR", fmt(r.xnpv_at_xirr, 6)],
+      ["xNPV at offer yield", r.xnpv_at_offer_yield === null ? "" : fmt(r.xnpv_at_offer_yield, 6)]
+    ];
+    F("metrics").querySelector("tbody").innerHTML = metrics.map(function (m) {
+      return "<tr><td>" + m[0] + "</td><td style='text-align:right'>" + m[1] + "</td></tr>";
+    }).join("");
+    var ytw = "";
+    if (r.ytc && r.ytc.length) {
+      ytw = "Yield-to-call: " + r.ytc.map(function (x) { return x[0] + " → " + fmt(x[1], 4) + "%"; }).join("; ");
+      if (r.ytw) ytw += " · Worst: " + r.ytw.type + " (" + r.ytw.date + ") " + fmt(r.ytw.yield, 4) + "%";
+      F("ytcw").textContent = ytw;
+    }
+    F("cfs").querySelector("tbody").innerHTML = r.cashflows.map(function (c) {
+      return "<tr><td>" + c.date + "</td><td style='text-align:right'>" + fmt(c.coupon, 4) + "</td><td style='text-align:right'>" + fmt(c.redemption, 4) + "</td><td style='text-align:right'>" + fmt(c.total_per_bond, 4) + "</td><td style='text-align:right'>" + inr(c.total_qty, 2) + "</td></tr>";
+    }).join("");
+    F("movement").querySelector("tbody").innerHTML = r.movement.map(function (m) {
+      return "<tr><td>" + fmt(m.yield, 4) + "%</td><td style='text-align:right'>" + fmt(m.price, 4) + "</td><td style='text-align:right'>" + (m.delta >= 0 ? "+" : "") + fmt(m.delta, 4) + "</td></tr>";
+    }).join("");
+  }
+
+  F("calcBtn").addEventListener("click", compute);
+  F("calcPrice").addEventListener("input", function () { priceTouched = true; });
+  (function () {
+    var t;
+    function debouncedCompute() { clearTimeout(t); t = setTimeout(compute, 280); }
+    ["calcPrice", "calcYield", "calcSettle", "calcAmount"].forEach(function (id) {
+      F(id).addEventListener("input", debouncedCompute);
+      F(id).addEventListener("change", compute);
+    });
+    document.querySelectorAll("input[name=mode]").forEach(function (r) { r.addEventListener("change", debouncedCompute); });
+  })();
+
+  F("quoteForm").addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    var err = F("calcErr");
+    err.textContent = "";
+    var btn = F("quoteBtn");
+    btn.disabled = true;
+    btn.textContent = "generating";
+    fetch("/api/quote_full", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        bond: collectBond(),
+        client_name: F("qName").value,
+        client_contact: F("qContact").value,
+        qty: lastQty,
+        price: lastResult ? lastResult.clean_price : ((priceTouched || loadedFullPrice == null) ? parseFloat(F("calcPrice").value) : loadedFullPrice),
+        settle: F("calcSettle").value,
+        slab: 30,
+        listed: "1",
+        price_type: "clean",
+        notes: F("qNotes").value
+      })
+    }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+      .then(function (res) {
+        btn.disabled = false;
+        btn.textContent = "Generate Quote Sheet";
+        if (!res.ok) { err.textContent = res.j.error || "quote failed"; return; }
+        var j = res.j;
+        F("quoteResult").style.display = "";
+        F("quoteNo").textContent = "Quote " + j.quote_no + " ready";
+        F("dlXlsx").href = j.xlsx;
+        F("dlPdf").href = j.pdf;
+        var rows = [
+          ["Clean price /100", fmt(j.summary.clean_price, 4)],
+          ["Accrued /100", fmt(j.summary.accrued_per100, 6) + " (" + j.summary.accrued_days + " days)"],
+          ["Dirty price /100", fmt(j.summary.dirty_price, 4)],
+          ["Principal", inr(j.summary.principal, 2)],
+          ["Stamp duty", inr(j.summary.stamp, 6)],
+          ["Total settlement", inr(j.summary.total, 2)],
+          ["Investor YTM (XIRR)", fmt(j.summary.xirr_pre, 4) + "%"],
+          ["Market BEY (YTM)", fmt(j.summary.ytm, 4) + "%"],
+          ["Effective annual", fmt(j.summary.effective_annual, 4) + "%"],
+          ["XIRR post-tax", fmt(j.summary.xirr_post, 4) + "%"],
+          ["Settlement date", j.summary.settlement]
+        ];
+        F("quoteSummary").querySelector("tbody").innerHTML = rows.map(function (m) {
+          return "<tr><td>" + m[0] + "</td><td style='text-align:right'>" + m[1] + "</td></tr>";
+        }).join("");
+        F("quoteResult").scrollIntoView({ behavior: "smooth", block: "nearest" });
+      })
+      .catch(function (e) {
+        btn.disabled = false;
+        btn.textContent = "Generate Quote Sheet";
+        err.textContent = String(e);
+      });
+  });
+
+  modeState();
+})();
+</script>
+{% endblock %}

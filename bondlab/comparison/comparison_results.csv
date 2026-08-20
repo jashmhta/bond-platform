@@ -1,0 +1,94 @@
+isin,issuer,type,rating,coupon,frequency,maturity,face,price,platform_yield,engine_yield,dev_bps,best_convention,staggered,recon_diff_pts
+INE516Y07444,Piramal Finance Limited,Secured - Regular Bond/Debenture,CARE AA+,6.75,SEMI ANNUALLY,26 Sep 2031,1000.0,1514.74,9.05,-2.211775,-1126.18,dirty_30_360_effective,True,-60.7268
+INE146O08399,Hinduja Leyland Finance Limited,Subordinate Debt Tier 2,CARE AA+,9.25,ANNUALLY,09 Jul 2031,100000.0,107746.63,9.3,7.542347,-175.77,dirty_30_360_nominal,False,-7.9755
+INE053F07579,Indian Railway Finance Corporation Lim,Tax-free Bond,CARE AAA,7.34,ANNUALLY,19 Feb 2028,10000.0,10925.83,5.18,3.425882,-175.41,dirty_30_360_nominal,False,-6.257
+INE906B07EO8,National Highways Authority Of India,Tax-free Bond,CARE AAA,7.39,ANNUALLY,09 Mar 2031,10000.0,11536.12,5.16,4.394103,-76.59,dirty_30_360_nominal,False,-6.5499
+INE020B07JS8,Rural Electrification Corporation Limi,Tax-free Bond,ICRA AAA,7.34,ANNUALLY,05 Nov 2030,10000.0,11217.48,5.16,5.583234,42.32,dirty_30_360_nominal,False,-4.1347
+INE906B07EI0,National Highways Authority Of India,Tax-free Bond,CARE AAA,7.35,ANNUALLY,11 Jan 2031,10000.0,11118.59,5.16,5.563441,40.34,dirty_30_360_nominal,False,-2.8067
+INE07HK07817,Krazybee Services Limited,Secured - Regular Bond/Debenture,CRISIL A,10.4,MONTHLY,25 Jan 2027,100000.0,100385.63,9.1,9.492395,39.24,clean_30_360_nominal,True,0.1676
+INE787H07362,India Infrastructure Finance Company L,Tax-free Bond,ICRA AAA,8.73,ANNUALLY,22 Jan 2029,10000.0,11214.01,5.18,5.481415,30.14,dirty_30_360_nominal,False,-4.286
+INE818W08115,Esaf Small Finance Bank Limited,Subordinate Debt Tier 2 - Lower,CARE A-,11.1,SEMI ANNUALLY,20 Apr 2031,100000.0,105950.67,11.0,10.726189,-27.38,dirty_30_360_effective,False,-5.6264
+INE818W08172,Esaf Small Finance Bank Limited,Subordinate Debt Tier 2 - Lower,CARE A-,11.65,QUARTERLY,25 Jul 2032,100000.0,105374.48,11.25,11.015615,-23.44,dirty_30_360_effective,False,-3.6669
+INE0M2307065,Andhra Pradesh State Beverages Corpora,State Guaranteed Bond (SLU),Ind-Ra AA,9.62,QUARTERLY,31 May 2028,1000000.0,1016078.26,8.4,8.594074,19.41,clean_30_360_nominal,True,0.3219
+INE053F07728,Indian Railway Finance Corporation Lim,Tax-free Bond,CARE AAA,8.63,ANNUALLY,26 Mar 2029,10000.0,11112.13,5.18,5.355588,17.56,dirty_30_360_nominal,False,-2.9613
+INE14H407132,Finnable Credit Private Limited,Secured - Regular Bond/Debenture,CARE BBB+,11.1,MONTHLY,16 Jul 2029,100000.0,99970.82,11.55,11.695408,14.54,clean_30_360_effective,True,-1.0791
+INE14H407124,Finnable Credit Private Limited,Secured - Regular Bond/Debenture,CARE BBB+,11.0,MONTHLY,16 Sep 2028,100000.0,99797.44,11.55,11.692983,14.3,clean_30_360_effective,True,-0.8094
+INE342T07718,Navi Finserv Limited,Secured - Regular Bond/Debenture,CRISIL A,10.3,MONTHLY,31 Mar 2028,10000.0,10023.88,10.7,10.567802,-13.22,clean_30_360_effective,False,-0.9073
+INE540P07509,U.P. Power Corporation Limited,State Guaranteed Bond (SLU),Ind-Ra A+,9.95,QUARTERLY,31 Mar 2031,1000000.0,1084354.14,8.2,8.083864,-11.61,dirty_30_360_nominal,True,-1.7881
+INE348L07415,Mas Financial Services Limited,Secured - Regular Bond/Debenture,CARE AA-,9.0,MONTHLY,18 Dec 2028,100000.0,99802.74,9.3698,9.482944,11.31,clean_30_360_effective,False,-0.5751
+INE859C07303,Ikf Finance Limited,Secured - Regular Bond/Debenture,CARE AA-,9.0,QUARTERLY,12 Sep 2028,100000.0,99834.4,9.5,9.400445,-9.96,clean_30_360_effective,True,-0.7679
+INE0M2307099,Andhra Pradesh State Beverages Corpora,State Guaranteed Bond (SLU),Ind-Ra AA,9.62,QUARTERLY,30 May 2031,1000000.0,1049951.26,8.42,8.333174,-8.68,clean_30_360_nominal,True,-0.349
+INE540P07418,U.P. Power Corporation Limited,State Guaranteed Bond (SLU),Ind-Ra A+,9.7,QUARTERLY,29 Mar 2030,1000000.0,1062233.67,8.2,8.118934,-8.11,dirty_30_360_nominal,True,-1.5789
+INE998Y07212,Berar Finance Limited,Secured - Regular Bond/Debenture,CRISIL BBB+,11.0,MONTHLY,25 Sep 2028,100000.0,100557.18,11.0,11.077532,7.75,dirty_30_360_nominal,True,-0.5579
+INE516Q07481,Asirvad Micro Finance Limited,Secured - Regular Bond/Debenture,CRISIL AA-,9.1,MONTHLY,02 Jun 2028,100000.0,99387.66,9.65,9.72107,7.11,dirty_30_360_nominal,False,-0.2888
+INE053F07835,Indian Railway Finance Corporation Lim,Tax-free Bond,CARE AAA,7.53,ANNUALLY,21 Dec 2030,10000.0,11418.58,5.16,5.096035,-6.4,dirty_30_360_nominal,False,-5.2157
+INE14H407116,Finnable Credit Private Limited,Secured - Regular Bond/Debenture,CARE BBB+,11.0,MONTHLY,26 Aug 2028,10000.0,9979.66,11.55,11.48682,-6.32,dirty_30_360_nominal,True,-0.7851
+INE0M2307172,Andhra Pradesh State Beverages Corpora,State Guaranteed Bond (SLU),Ind-Ra AA,9.62,QUARTERLY,29 Nov 2030,1000000.0,1045466.26,8.4,8.339849,-6.02,clean_30_360_nominal,True,-0.2201
+INE540P07491,U.P. Power Corporation Limited,State Guaranteed Bond (SLU),Ind-Ra A+,9.95,QUARTERLY,29 Mar 2030,1000000.0,1069639.14,8.2,8.140623,-5.94,dirty_30_360_nominal,True,-1.5445
+INE01YL07383,Earlysalary Services Private Limited,Secured - Regular Bond/Debenture,CARE A-,10.7,MONTHLY,05 Mar 2027,100000.0,101031.51,9.85,9.907276,5.73,dirty_30_360_effective,True,-0.5814
+INE07HK07825,Krazybee Services Limited,Secured - Regular Bond/Debenture,CARE A,10.65,MONTHLY,12 Aug 2027,100000.0,101313.55,9.7,9.648952,-5.1,clean_30_360_effective,True,-0.4265
+INE572J07810,Spandana Sphoorty Financial Limited,Secured - Regular Bond/Debenture,ICRA BBB+,11.25,MONTHLY,26 Apr 2028,10000.0,9985.13,11.75,11.797916,4.79,dirty_30_360_nominal,True,-0.6148
+INE882Z08049,Muthoot Housing Finance Company Limite,Senior Unsecured - Regular Bond/Debenture,CRISIL AA-,10.25,MONTHLY,23 Jun 2029,100000.0,101435.17,10.0,9.956984,-4.3,dirty_30_360_nominal,True,-0.8184
+INE229U07178,Namra Finance Limited,Secured - Regular Bond/Debenture,ACUITE A-,11.25,QUARTERLY,11 Sep 2028,100000.0,102597.21,11.4,11.42971,2.97,dirty_30_360_effective,True,-2.8772
+INE658F08565,Kerala Infrastructure Investment  Fund,State Guaranteed Bond (SLU),ACUITE AA,9.3,QUARTERLY,21 Jan 2032,100000.0,103095.1,9.0,9.02967,2.97,dirty_30_360_effective,True,-1.824
+INE0MYJ07187,Progfin Private Limited,Secured - Regular Bond/Debenture,ICRA BBB+,10.5,MONTHLY,30 Dec 2027,100000.0,99232.06,11.5,11.529278,2.93,dirty_30_360_nominal,True,-0.5467
+INE01YL07441,Earlysalary Services Private Limited,Secured - Regular Bond/Debenture,CARE A-,10.5,QUARTERLY,04 Jul 2028,100000.0,100885.99,11.2,11.170916,-2.91,dirty_30_360_effective,True,-2.0658
+INE403Q07GU6,Kosamattam Finance Limited,Secured - Regular Bond/Debenture,Ind-Ra A,9.0,MONTHLY,19 Feb 2029,1000.0,975.94,10.4,10.42668,2.67,dirty_30_360_nominal,False,-0.6675
+INE658F08516,Kerala Infrastructure Investment  Fund,State Guaranteed Bond (SLU),ACUITE AA,9.3,QUARTERLY,21 Jan 2033,100000.0,103447.6,9.0,9.025382,2.54,dirty_30_360_effective,True,-2.0013
+INE443L07174,Belstar Microfinance Limited,Secured - Regular Bond/Debenture,CRISIL AA,9.2,QUARTERLY,12 Aug 2028,100000.0,100821.94,9.1,9.124524,2.45,dirty_30_360_effective,True,-0.6439
+INE540P07400,U.P. Power Corporation Limited,State Guaranteed Bond (SLU),Ind-Ra A+,9.7,QUARTERLY,30 Mar 2029,1000000.0,1048388.67,8.2,8.178495,-2.15,dirty_30_360_nominal,True,-1.3446
+INE658F08540,Kerala Infrastructure Investment  Fund,State Guaranteed Bond (SLU),ACUITE AA,9.3,QUARTERLY,21 Jan 2035,100000.0,104077.3,9.0,9.018229,1.82,dirty_30_360_effective,True,-2.3242
+INE0TLC07077,The Andhra Pradesh Mineral Development,State Guaranteed Bond (SLU),ACUITE AA,9.3,QUARTERLY,07 May 2030,100000.0,103763.05,8.35,8.367369,1.74,clean_30_360_effective,True,-0.7549
+INE01YL07409,Earlysalary Services Private Limited,Secured - Regular Bond/Debenture,CARE A-,10.7,MONTHLY,08 Jan 2028,100000.0,100674.77,10.9,10.917166,1.72,dirty_30_360_effective,True,-0.9324
+INE031A07AM9,Housing And Urban Development Corporat,Tax-free Bond,CARE AAA,7.39,ANNUALLY,08 Feb 2031,10000.0,11247.29,5.17,5.18152,1.15,dirty_30_360_nominal,False,-3.8527
+INE403Q07GX0,Kosamattam Finance Limited,Secured - Regular Bond/Debenture,Ind-Ra A,10.0,MONTHLY,06 Jan 2029,100000.0,100448.66,10.4,10.411131,1.11,dirty_30_360_effective,True,-1.2907
+INE557F07090,National Housing Bank,Secured - Regular Bond/Debenture,ICRA AAA,8.63,ANNUALLY,13 Jan 2029,10000.0,11273.86,5.16,5.168805,0.88,dirty_30_360_nominal,False,-5.1334
+INE040A08914,Hdfc Bank Limited,Unsecured - Regular Bond/Debenture,ICRA AAA,7.97,ANNUALLY,17 Feb 2033,100000.0,105382.12,7.67,7.678519,0.85,dirty_30_360_nominal,False,-3.9643
+INE896L07AO8,Indostar Capital Finance Limited,Secured - Regular Bond/Debenture,CARE AA-,9.1,ANNUALLY,22 Jan 2029,100000.0,105303.38,9.0,9.00826,0.83,dirty_30_360_nominal,False,-5.1898
+INE0TLC07051,The Andhra Pradesh Mineral Development,State Guaranteed Bond (SLU),Ind-Ra AA,9.3,QUARTERLY,09 May 2031,100000.0,104636.65,8.35,8.358311,0.83,clean_30_360_effective,True,-0.9609
+IN0020220011,Government Of India,Central Government Securities,Sovereign,7.1,SEMI ANNUALLY,18 Apr 2029,10000.0,10479.95,6.1,6.092885,-0.71,dirty_ACT_ACT_nominal,False,-2.3842
+IN0020220011,Government Of India,Central Government Securities,Sovereign,7.1,SEMI ANNUALLY,18 Apr 2029,10000.0,10479.95,6.1,6.092885,-0.71,dirty_ACT_ACT_nominal,False,-2.3842
+INE787H07396,India Infrastructure Finance Company L,Tax-free Bond,Ind-Ra AAA,8.55,ANNUALLY,27 Mar 2029,10000.0,11134.42,5.18,5.173169,-0.68,dirty_30_360_nominal,False,-3.366
+INE0TLC07036,The Andhra Pradesh Mineral Development,State Guaranteed Bond (SLU),Ind-Ra AA,9.3,QUARTERLY,08 May 2035,100000.0,107487.95,8.35,8.34344,-0.66,clean_30_360_effective,True,-1.6465
+INE423A07526,Adani Enterprises Limited,Secured - Regular Bond/Debenture,ICRA AA-,8.9,ANNUALLY,12 Jan 2031,10000.0,10565.23,8.78,8.785796,0.58,dirty_30_360_nominal,False,-5.3195
+INE040A08773,Hdfc Bank Limited,Unsecured - Regular Bond/Debenture,ICRA AAA,7.8,ANNUALLY,06 Sep 2032,1000000.0,1079799.42,7.67,7.675777,0.58,dirty_30_360_nominal,False,-7.3827
+INE033L07IP8,Tata Capital Housing Finance Limited,Secured - Regular Bond/Debenture,CRISIL AAA,7.17,ANNUALLY,21 May 2030,100000.0,100655.45,7.5,7.494583,-0.54,dirty_30_360_nominal,False,-1.7499
+INE031A07865,Housing And Urban Development Corporat,Tax-free Bond,CARE AAA,7.51,ANNUALLY,16 Feb 2028,10000.0,10701.15,5.18,5.185332,0.53,dirty_30_360_nominal,False,-3.789
+INE787H07347,India Infrastructure Finance Company L,Tax-free Bond,ICRA AAA,8.66,ANNUALLY,22 Jan 2034,10000.0,12608.55,5.15,5.155258,0.53,dirty_30_360_nominal,False,-4.9194
+IN0020250141,Government Of India,Central Government Securities,Sovereign,6.36,SEMI ANNUALLY,16 Feb 2031,10000.0,10009.07,6.35,6.345312,-0.47,dirty_ACT_ACT_nominal,False,-0.0527
+INE787H07339,India Infrastructure Finance Company L,Tax-free Bond,ICRA AAA,8.48,ANNUALLY,22 Jan 2029,10000.0,11214.01,5.18,5.184694,0.47,dirty_30_360_nominal,False,-4.8414
+IN0020250141,Government Of India,Central Government Securities,Sovereign,6.36,SEMI ANNUALLY,16 Feb 2031,10000.0,10009.07,6.35,6.345312,-0.47,dirty_ACT_ACT_nominal,False,-0.0527
+INE282H07083,Jio Credit Limited,Secured - Regular Bond/Debenture,CRISIL AAA,8.05,ANNUALLY,31 Jul 2031,100000.0,100979.94,7.9,7.89559,-0.44,dirty_30_360_nominal,False,-0.4201
+IN0020200245,Government Of India,Central Government Securities,Sovereign,6.22,SEMI ANNUALLY,16 Mar 2035,10000.0,9967.07,6.68,6.67606,-0.39,dirty_ACT_ACT_nominal,False,-2.6448
+IN0020200245,Government Of India,Central Government Securities,Sovereign,6.22,SEMI ANNUALLY,16 Mar 2035,10000.0,9967.07,6.68,6.67606,-0.39,dirty_ACT_ACT_nominal,False,-2.6448
+INE219X07264,Indigrid Infrastructure Trust,Secured - Regular Bond/Debenture,CRISIL AAA,8.2,ANNUALLY,06 May 2031,10000.0,10399.87,7.75,7.746393,-0.36,dirty_30_360_nominal,False,-2.3373
+IN0020250026,Government Of India,Central Government Securities,Sovereign,6.33,SEMI ANNUALLY,05 May 2035,10000.0,9972.57,6.65,6.646396,-0.36,dirty_ACT_ACT_nominal,False,-1.8294
+IN0020250026,Government Of India,Central Government Securities,Sovereign,6.33,SEMI ANNUALLY,05 May 2035,10000.0,9972.57,6.65,6.646396,-0.36,dirty_ACT_ACT_nominal,False,-1.8294
+INE557F07181,National Housing Bank,Tax-free Bond,ICRA AAA,8.68,ANNUALLY,24 Mar 2029,10000.0,11179.32,5.16,5.1565,-0.35,dirty_30_360_nominal,False,-3.4808
+INE040A08799,Hdfc Bank Limited,Senior Unsecured - Regular Bond/Debenture,ICRA AAA,8.07,ANNUALLY,12 Oct 2032,1000000.0,1087096.82,7.67,7.673354,0.34,dirty_30_360_nominal,False,-6.8433
+INE976I07DG4,Tata Capital Limited,Secured - Regular Bond/Debenture,CRISIL AAA,7.88,ANNUALLY,07 Jul 2031,100000.0,101510.03,7.72,7.717366,-0.26,dirty_30_360_nominal,False,-0.9079
+IN4520260014,Telangana,State Development Loan,Sovereign,7.97,SEMI ANNUALLY,08 Apr 2043,10000.0,10721.41,7.51,7.507369,-0.26,dirty_ACT_ACT_nominal,False,-2.9
+IN4520260014,Telangana,State Development Loan,Sovereign,7.97,SEMI ANNUALLY,08 Apr 2043,10000.0,10721.41,7.51,7.507369,-0.26,dirty_ACT_ACT_nominal,False,-2.9
+IN0020220029,Government Of India,Central Government Securities,Sovereign,7.54,SEMI ANNUALLY,23 May 2036,10000.0,10758.7,6.72,6.717602,-0.24,dirty_ACT_ACT_nominal,False,-1.8002
+IN0020220029,Government Of India,Central Government Securities,Sovereign,7.54,SEMI ANNUALLY,23 May 2036,10000.0,10758.7,6.72,6.717602,-0.24,dirty_ACT_ACT_nominal,False,-1.8002
+IN3920260020,Delhi Government,State Development Loan,Sovereign,7.75,SEMI ANNUALLY,24 Jun 2041,10000.0,10338.51,7.5,7.497882,-0.21,dirty_ACT_ACT_nominal,False,-1.1837
+IN3920260020,Delhi Government,State Development Loan,Sovereign,7.75,SEMI ANNUALLY,24 Jun 2041,10000.0,10338.51,7.5,7.497882,-0.21,dirty_ACT_ACT_nominal,False,-1.1837
+INE674K08083,Aditya Birla Capital Limited,Subordinate Debt Tier 2 - Lower,CRISIL AAA,8.0668,ANNUALLY,30 Apr 2036,100000.0,101797.49,8.15,8.152012,0.2,dirty_30_360_nominal,False,-2.4069
+INE498L07202,L&T Finance Limited,Secured - Regular Bond/Debenture,CARE AAA,7.7942,ANNUALLY,27 Jun 2031,100000.0,101289.46,7.74,7.73809,-0.19,dirty_30_360_nominal,False,-1.1117
+IN0020210202,Government Of India,Central Government Securities,Sovereign,6.95,SEMI ANNUALLY,16 Dec 2061,10000.0,9642.56,7.33,7.328341,-0.17,dirty_ACT_ACT_nominal,False,-1.2163
+IN0020230051,Government Of India,Central Government Securities,Sovereign,7.3,SEMI ANNUALLY,19 Jun 2053,100000.0,101554.17,7.27,7.268314,-0.17,dirty_ACT_ACT_nominal,False,-1.2166
+IN0020210202,Government Of India,Central Government Securities,Sovereign,6.95,SEMI ANNUALLY,16 Dec 2061,10000.0,9642.56,7.33,7.328341,-0.17,dirty_ACT_ACT_nominal,False,-1.2163
+IN0020230051,Government Of India,Central Government Securities,Sovereign,7.3,SEMI ANNUALLY,19 Jun 2053,100000.0,101554.17,7.27,7.268314,-0.17,dirty_ACT_ACT_nominal,False,-1.2166
+IN0020260033,Government Of India,Central Government Securities,Sovereign,7.71,SEMI ANNUALLY,18 May 2066,10000.0,10588.73,7.4,7.398387,-0.16,dirty_ACT_ACT_nominal,False,-1.9488
+INE787H07149,India Infrastructure Finance Company L,Tax-free Bond,CARE AAA,7.36,ANNUALLY,22 Jan 2028,10000.0,10708.21,5.19,5.18845,-0.16,dirty_30_360_nominal,False,-4.2137
+IN0020260033,Government Of India,Central Government Securities,Sovereign,7.71,SEMI ANNUALLY,18 May 2066,10000.0,10588.73,7.4,7.398387,-0.16,dirty_ACT_ACT_nominal,False,-1.9488
+IN0020230077,Government Of India,Central Government Securities,Sovereign,7.18,SEMI ANNUALLY,24 Jul 2037,10000.0,10370.05,6.76,6.758665,-0.13,dirty_ACT_ACT_nominal,False,-0.4982
+INE134E07349,Power Finance Corporation Limited,Tax-free Bond,CRISIL AAA,7.36,ANNUALLY,04 Jan 2028,10000.0,10736.29,5.18,5.181251,0.13,dirty_30_360_nominal,False,-4.5779
+IN0020230077,Government Of India,Central Government Securities,Sovereign,7.18,SEMI ANNUALLY,24 Jul 2037,10000.0,10370.05,6.76,6.758665,-0.13,dirty_ACT_ACT_nominal,False,-0.4982
+INE818W08099,Esaf Small Finance Bank Limited,Subordinate Debt Tier 2,CARE A-,11.25,MONTHLY,04 May 2029,100000.0,103329.03,10.5,10.500991,0.1,dirty_30_360_effective,False,-1.5672
+INE414G07KB6,Muthoot Finance Limited,Secured - Regular Bond/Debenture,ICRA AA+,8.65,ANNUALLY,12 Jun 2031,100000.0,102380.11,8.43,8.429032,-0.1,dirty_30_360_nominal,False,-1.5896
+IN0020250117,Government Of India,Central Government Securities,Sovereign,7.43,SEMI ANNUALLY,19 Jan 2076,10000.0,10100.41,7.4,7.398989,-0.1,dirty_ACT_ACT_nominal,False,-0.619
+IN0020250117,Government Of India,Central Government Securities,Sovereign,7.43,SEMI ANNUALLY,19 Jan 2076,10000.0,10100.41,7.4,7.398989,-0.1,dirty_ACT_ACT_nominal,False,-0.619
+INE031A07915,Housing And Urban Development Corporat,Tax-free Bond,CARE AAA,8.51,ANNUALLY,25 Oct 2028,10000.0,11361.44,5.18,5.179424,-0.06,dirty_30_360_nominal,False,-6.9274
+INE040A08807,Hdfc Bank Limited,Unsecured - Regular Bond/Debenture,ICRA AAA,8.0,ANNUALLY,27 Jul 2032,1000000.0,1019818.1,7.67,7.669532,-0.05,dirty_30_360_nominal,False,-0.4689
+INE101Q07CB5,Muthoot Mcred Limited,Secured - Regular Bond/Debenture,ICRA A,9.3,MONTHLY,07 Aug 2029,10000.0,9784.98,10.75,10.750029,0.0,dirty_30_360_effective,False,-1.5228

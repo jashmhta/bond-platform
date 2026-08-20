@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Bond Offers | BondLab{% endblock %}
+{% block body %}
+<div class="wrap">
+  <section class="hero">
+    <span class="eyebrow">SEBI-standardised bond inventory</span>
+    <h1>Fixed income, <span class="hl">made clear.</span></h1>
+    <p>Transparent pricing with YTM, accrued interest, settlement breakup and post-tax XIRR.
+       Every number is computed at machine precision.</p>
+    <div class="ctas">
+      <a class="btn primary" href="#offers">Browse offers</a>
+      <a class="btn" href="{{ url_for('admin_login') }}">Manage inventory</a>
+    </div>
+  </section>
+
+  <div class="quiet-strip" aria-hidden="true">
+    <span>Verified against live platform data</span>
+    <span>G-Secs within 1 bp</span>
+    <span>Corporates within 2 bp</span>
+    <span>Machine-precision pricing</span>
+  </div>
+
+  <div class="hero-stats">
+    <div class="hs"><b>{{ stats.count }}</b><span>live offers in inventory</span></div>
+    <div class="hs"><b><em>{{ "%.2f"|format(stats.min_yield) }} to {{ "%.2f"|format(stats.max_yield) }}</em>%</b><span>offer yield range p.a.</span></div>
+    <div class="hs"><b>CCIL</b><span>clearing-corp settlement</span></div>
+    <div class="hs"><b>&lt;1 <em>bp</em></b><span>G-Sec yield accuracy, live-verified</span></div>
+  </div>
+
+  <form class="filters" method="get" id="offers">
+    <input type="text" name="q" value="{{ q }}" placeholder="Search name or ISIN" aria-label="Search name or ISIN">
+    <select name="category" aria-label="Category">
+      <option value="">All categories</option>
+      {% for c in categories %}<option value="{{ c }}" {% if c==category %}selected{% endif %}>{{ c }}</option>{% endfor %}
+    </select>
+    <select name="type" aria-label="Type">
+      <option value="">All types</option>
+      {% for t in types %}<option value="{{ t }}" {% if t==btype %}selected{% endif %}>{{ t }}</option>{% endfor %}
+    </select>
+    <select name="rating" aria-label="Rating">
+      <option value="">All ratings</option>
+      {% for r in ratings %}<option value="{{ r }}" {% if r==rating %}selected{% endif %}>{{ r }}</option>{% endfor %}
+    </select>
+    <select name="sort" aria-label="Sort">
+      <option value="yield" {% if sort=="yield" %}selected{% endif %}>Highest yield</option>
+      <option value="rating" {% if sort=="rating" %}selected{% endif %}>Best rating</option>
+      <option value="tenure" {% if sort=="tenure" %}selected{% endif %}>Shortest tenure</option>
+      <option value="new" {% if sort=="new" %}selected{% endif %}>Newly listed</option>
+    </select>
+    <button class="btn primary" type="submit">Filter</button>
+  </form>
+
+  <div class="bondsgrid">
+  {% for b in bonds %}
+    <div class="bondcard">
+      <div class="top">
+        <div>
+          <h3>{{ b.security_name }}</h3>
+          <div class="meta" style="margin-top:9px">
+            <span class="badge blue">{{ b.type or "Bond" }}</span>
+            <span class="badge gold">{{ b.credit_rating or "NR" }}</span>
+            <span class="badge muted">{{ b.issuer_category or "" }}</span>
+          </div>
+        </div>
+        <div class="yield">{{ "%.2f"|format(b.offer_yield or 0) }}%<small>offer yield</small></div>
+      </div>
+      <div class="stats">
+        <span>Coupon <b>{{ "%.4f"|format(b.coupon) }}%</b></span>
+        <span>Frequency <b>{{ b.coupon_frequency }}</b></span>
+        <span>Maturity <b>{{ b.maturity }}</b></span>
+        <span>Residual <b>{{ b.residual or "" }}</b></span>
+        <span>Offer price <b>₹{{ "%.4f"|format(b.offer_price or 0) }}</b></span>
+        <span>Min invest <b>₹{{ "{:,.0f}".format(b.min_investment or 0) }}</b></span>
+      </div>
+      <div class="foot">
+        <span class="minibadge">{{ b.tiny_link }}</span>
+        <a class="btn" href="{{ url_for('offer', slug=b.slug) }}">View &amp; Quote</a>
+      </div>
+    </div>
+  {% else %}
+    <p class="note">No bonds match your filters.</p>
+  {% endfor %}
+  </div>
+</div>
+{% endblock %}

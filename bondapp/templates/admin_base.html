@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}Admin | BondLab{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<nav class="nav">
+  <a class="logo" href="{{ url_for('admin_dash') }}"><img class="logo-img" src="{{ url_for('static', filename='logo.png') }}" alt="BondLab logo">BondLab <span class="badge gold" style="margin-left:6px;font-size:10.5px">ADMIN</span></a>
+  <div class="links">
+    <a class="hide-sm" href="{{ url_for('index') }}">View site</a>
+    <a href="{{ url_for('admin_logout') }}" class="cta">Logout</a>
+  </div>
+</nav>
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  <div class="wrap">
+    {% for cat, m in messages %}<div class="flash {{ cat }}">{{ m }}</div>{% endfor %}
+  </div>
+  {% endif %}
+{% endwith %}
+<div class="wrap">
+  <div class="admin-main">
+    <aside class="admin-side">
+      <a href="{{ url_for('admin_dash') }}" class="{% if request.endpoint=='admin_dash' %}active{% endif %}">Dashboard</a>
+      <a href="{{ url_for('admin_bond_new') }}" class="{% if request.endpoint=='admin_bond_new' %}active{% endif %}">Add Bond (Form)</a>
+      <a href="{{ url_for('admin_import') }}" class="{% if request.endpoint=='admin_import' %}active{% endif %}">Bulk Excel Import</a>
+      <span class="sep"></span>
+      <a href="{{ url_for('admin_template') }}">Download Template (.xlsx)</a>
+      <a href="{{ url_for('admin_export') }}">Export All Bonds (.xlsx)</a>
+      <span class="sep"></span>
+      <a href="{{ url_for('admin_quotes') }}" class="{% if request.endpoint=='admin_quotes' %}active{% endif %}">Quote Sheets</a>
+    </aside>
+    <main style="min-width:0">{% block body %}{% endblock %}</main>
+  </div>
+</div>
+<script>
+(function () {
+  function copyText(t, btn) {
+    function done() { if (btn) { btn.classList.add("copied"); btn.textContent = "Copied"; setTimeout(function () { btn.classList.remove("copied"); btn.textContent = btn.getAttribute("data-label") || "Copy"; }, 1500); } }
+    function fallback() {
+      var ta = document.createElement("textarea");
+      ta.value = t; ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand("copy"); done(); } catch (e) {}
+      document.body.removeChild(ta);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done, fallback);
+    else fallback();
+  }
+  document.addEventListener("click", function (e) {
+    var t = e.target.closest("[data-copy]");
+    if (t) {
+      if (t.classList.contains("copybtn")) { copyText(t.getAttribute("data-copy"), t); return; }
+      copyText(t.getAttribute("data-copy"));
+      t.classList.add("copied");
+      setTimeout(function () { t.classList.remove("copied"); }, 1200);
+      return;
+    }
+    var b = e.target.closest(".copybtn");
+    if (b) {
+      var inp = document.getElementById(b.getAttribute("data-copy-input"));
+      if (inp) copyText(inp.value.trim(), b);
+    }
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+{% extends "admin_base.html" %}
+{% block title %}Bulk Import | BondLab Admin{% endblock %}
+{% block body %}
+{% if result %}
+<div class="card">
+  <h2><span class="dot"></span>Import Complete</h2>
+  <div class="kpis">
+    <div class="kpi accent"><div class="k">Inserted</div><div class="v">{{ result.inserted }}</div></div>
+    <div class="kpi"><div class="k">Skipped (errors)</div><div class="v">{{ result.skipped }}</div></div>
+  </div>
+  <a class="btn" href="{{ url_for('admin_dash') }}">View inventory</a>
+</div>
+{% elif confirm %}
+<div class="card">
+  <h2><span class="dot"></span>Import Preview <span class="badge gold" style="margin-left:8px">format: {{ fmt }}</span></h2>
+  <p class="note">Review before committing. Rows with errors will be skipped.</p>
+  <div class="preview-grid">
+    <table>
+      <thead><tr><th>Sheet</th><th>Row</th><th>Security</th><th>ISIN</th><th class="num">Coupon</th><th>Freq</th><th class="num">FV</th><th class="num">Maturity</th><th class="num">Yield</th><th class="num">Price</th><th>Status</th></tr></thead>
+      <tbody>
+      {% for p in preview %}
+        <tr>
+          <td class="num">{{ p.sheet }}</td>
+          <td class="num">{{ p.row }}</td>
+          <td>{{ p.data.security_name or "" }}</td>
+          <td class="num">{{ p.data.isin or "" }}</td>
+          <td class="num">{{ p.data.coupon }}</td>
+          <td>{{ p.data.coupon_frequency }}</td>
+          <td class="num">{{ p.data.face_value }}</td>
+          <td class="num">{{ p.data.maturity }}</td>
+          <td class="num">{{ p.data.offer_yield }}</td>
+          <td class="num">{{ p.data.offer_price }}</td>
+          <td>
+            {% if p.ok %}<span class="badge green">OK</span>
+            {% else %}<span class="badge red">{{ p.errors|join("; ") }}</span>{% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <form method="post" style="margin-top:18px">
+    <input type="hidden" name="stage" value="confirm">
+    <button class="btn primary" type="submit">Confirm Import ({{ preview|selectattr("ok")|list|length }} valid rows)</button>
+  </form>
+</div>
+{% else %}
+<div class="card">
+  <h2><span class="dot"></span>Bulk Excel Import</h2>
+  <p class="note">
+    Upload an <b>.xlsx</b> file using the 14-column template (exact headers required) or the legacy
+    25-column AdminWebsiteheaders format; both are auto-detected. Cashflows, YTM, accrued and settlement
+    are computed server-side with machine precision.
+  </p>
+  <form method="post" enctype="multipart/form-data" style="margin-top:18px">
+    <input type="hidden" name="stage" value="upload">
+    <label>Excel file (.xlsx)</label>
+    <input type="file" name="file" accept=".xlsx" required>
+    <div style="margin-top:20px;display:flex;gap:12px;flex-wrap:wrap">
+      <button class="btn primary" type="submit">Upload &amp; Preview</button>
+      <a class="btn" href="{{ url_for('admin_template') }}">Download 14-column template</a>
+    </div>
+  </form>
+</div>
+{% endif %}
+{% endblock %}

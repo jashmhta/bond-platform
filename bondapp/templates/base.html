@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}BondLab{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<meta name="description" content="BondLab. Bond offers, precision YTM calculators and client quote sheets.">
+</head>
+<body data-route="{{ request.path }}">
+<nav class="nav">
+  <a class="logo" href="{{ url_for('index') }}"><img class="logo-img" src="{{ url_for('static', filename='logo.png') }}" alt="BondLab logo">BondLab</a>
+  <div class="links">
+    <a class="hide-sm" href="{{ url_for('index') }}">Offers</a>
+    <a class="hide-sm" href="{{ url_for('index') }}?sort=rating">Top Rated</a>
+    <a class="hide-sm" href="{{ url_for('index') }}?sort=new">Newly Listed</a>
+    <a href="{{ url_for('calculator') }}">Calculator</a>
+    <a href="{{ url_for('admin_login') }}" class="cta">Admin</a>
+  </div>
+</nav>
+<nav class="dock" aria-label="Mobile">
+  <a href="{{ url_for('index') }}" data-dock="/" ><span class="dock-ico">⌂</span>Offers</a>
+  <a href="{{ url_for('index') }}?sort=rating" data-dock="/?sort=rating"><span class="dock-ico">★</span>Top Rated</a>
+  <a href="{{ url_for('index') }}?sort=new" data-dock="/?sort=new"><span class="dock-ico">✚</span>New</a>
+  <a href="{{ url_for('calculator') }}" data-dock="/calculator"><span class="dock-ico">ƒ</span>Calculator</a>
+</nav>
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  <div class="wrap">
+    {% for cat, m in messages %}<div class="flash {{ cat }}">{{ m }}</div>{% endfor %}
+  </div>
+  {% endif %}
+{% endwith %}
+{% block body %}{% endblock %}
+<footer class="page">
+  <div class="inner">
+    <b>Methodology</b> street/FIMMDA convention, hybrid Newton-bisection yield solving at machine precision, settlement includes stamp duty at 0.0001% (transfer).
+    All calculations run server-side on the BondLab engine, cross-validated against live platform data (IndiaBonds, Wint Wealth, SMEST, Jiraaf);
+    G-Secs within 1 bp, corporates within 2 bp on 83% of live inventory.
+    Not investment advice; verify cashflows against ISIN master and offer documents.
+  </div>
+</footer>
+<script>
+(function () {
+  var nav = document.querySelector(".nav");
+  if (nav) {
+    var onScroll = function () { nav.classList.toggle("scrolled", window.scrollY > 8); };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+  }
+  var route = (document.body.getAttribute("data-route") || "/") + (location.search || "");
+  document.querySelectorAll(".dock a").forEach(function (a) {
+    if (a.getAttribute("data-dock") === route) a.classList.add("active");
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,83 @@
+{% extends "admin_base.html" %}
+{% block title %}Dashboard | BondLab Admin{% endblock %}
+{% block body %}
+<div class="kpis">
+  <div class="kpi accent"><div class="k">Bonds in inventory</div><div class="v">{{ stats.bonds }}</div></div>
+  <div class="kpi"><div class="k">Quote sheets generated</div><div class="v">{{ stats.quotes }}</div></div>
+  <div class="kpi">
+    <div class="k">Quick actions</div>
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+      <a class="btn small primary" href="{{ url_for('admin_bond_new') }}">Add bond</a>
+      <a class="btn small" href="{{ url_for('admin_import') }}">Bulk import</a>
+      <a class="btn small" href="{{ url_for('admin_template') }}">Template</a>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h2><span class="dot"></span>Bond Inventory</h2>
+  <div class="big-table">
+    <table style="min-width:1080px">
+      <thead><tr>
+        <th>ID</th><th>Security</th><th>ISIN</th><th>Category</th><th>Type</th><th>Rating</th>
+        <th class="num">Coupon</th><th>Freq</th><th class="num">Maturity</th><th class="num">Offer Yield</th><th class="num">Offer Price</th>
+        <th class="num">Tiny URL</th><th>Actions</th>
+      </tr></thead>
+      <tbody>
+      {% for b in bonds %}
+        <tr>
+          <td class="num">{{ b.id }}</td>
+          <td><a href="{{ url_for('offer', slug=b.slug) }}" style="font-weight:600;text-decoration:underline;text-decoration-color:var(--gold-deep);text-underline-offset:3px">{{ b.security_name }}</a></td>
+          <td class="num copy-isin" data-copy="{{ b.isin or '' }}" title="Click to copy ISIN">{{ b.isin or "" }}</td>
+          <td>{{ b.issuer_category or "" }}</td>
+          <td>{{ b.type or "" }}</td>
+          <td><span class="badge gold">{{ b.credit_rating or "NR" }}</span></td>
+          <td class="num">{{ "%.4f"|format(b.coupon) }}%</td>
+          <td>{{ b.coupon_frequency }}</td>
+          <td class="num">{{ b.maturity }}</td>
+          <td class="num">{{ "%.4f"|format(b.offer_yield or 0) }}%</td>
+          <td class="num">{{ "%.4f"|format(b.offer_price or 0) }}</td>
+          <td class="num"><a href="{{ url_for('tiny', slug=b.slug) }}" class="nowrap">{{ b.tiny_link }}</a></td>
+          <td style="white-space:nowrap">
+            <a class="btn small" href="{{ url_for('admin_bond_edit', bid=b.id) }}">Edit</a>
+            <form method="post" action="{{ url_for('admin_bond_delete', bid=b.id) }}" style="display:inline"
+                  onsubmit="return confirm('Delete {{ b.security_name }}?')">
+              <button class="btn small danger" type="submit">Delete</button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card" style="margin-top:20px">
+  <h2><span class="dot"></span>Recent Quote Sheets</h2>
+  <div class="big-table">
+    <table style="min-width:980px">
+      <thead><tr><th>Quote No</th><th>Client</th><th>Security</th><th class="num">Qty</th><th class="num">Price</th><th class="num">Settlement</th><th class="num">Total</th><th class="num">YTM</th><th>Files</th></tr></thead>
+      <tbody>
+      {% for q in quotes %}
+        <tr>
+          <td class="num">{{ q.quote_no }}</td>
+          <td>{{ q.client_name or "" }}</td>
+          <td>{{ q.security_name }}</td>
+          <td class="num">{{ "{:,.0f}".format(q.qty) }}</td>
+          <td class="num">{{ "%.4f"|format(q.price) }}</td>
+          <td class="num">{{ q.settle }}</td>
+          <td class="num">₹{{ "{:,.2f}".format(q.total or 0) }}</td>
+          <td class="num">{{ "%.4f"|format(q.ytm or 0) }}%</td>
+          <td style="white-space:nowrap">
+            <a class="btn small" href="{{ url_for('download_quote', quote_no=q.quote_no, fmt='xlsx') }}">.xlsx</a>
+            <a class="btn small" href="{{ url_for('download_quote', quote_no=q.quote_no, fmt='pdf') }}">.pdf</a>
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="9" class="note">No quote sheets yet.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

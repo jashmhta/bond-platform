@@ -1,0 +1,100 @@
+{% extends "admin_base.html" %}
+{% block title %}{{ "Add Bond" if is_new else "Edit Bond" }} | BondLab Admin{% endblock %}
+{% block body %}
+<div class="card">
+  <h2><span class="dot"></span>{{ "Add Bond (Form Entry)" if is_new else "Edit Bond" }}</h2>
+
+  <div class="form-help">
+    <span class="dot"></span>
+    <div>
+      <b>Required</b> fields are marked <b><span style="color:var(--red)">*</span></b>. Everything else is optional.
+      <br>On save the backend auto-computes whatever is left blank:
+      <ul>
+        <li><b>Offer Price</b> — computed from Offer Yield when price is left blank (enter one of the two)</li>
+        <li><b>Residual period</b> — computed from the maturity date</li>
+        <li><b>Tiny URL</b> — auto link to the offer page (<code>/b/&lt;slug&gt;</code>)</li>
+        <li><b>Day count</b> — default: G-Sec → ACT/ACT, everything else → 30/360</li>
+        <li><b>Slug, ISIN normalisation &amp; timestamps</b></li>
+      </ul>
+    </div>
+  </div>
+
+  {% if errors %}
+    <div class="flash error">
+      {% for e in errors %}<div>• {{ e }}</div>{% endfor %}
+    </div>
+  {% endif %}
+
+  <form method="post">
+    <div class="row2">
+      <div><label>Security Name <span class="req">*</span></label><input name="security_name" value="{{ b.security_name or '' }}" placeholder="e.g. Satin Finserv NCD Series IV" required></div>
+      <div><label>ISIN No. <span class="opt">(12 chars · optional)</span></label><div style="display:flex;gap:8px;align-items:center"><input name="isin" id="adminIsin" value="{{ b.isin or '' }}" placeholder="INE0ABC12345" style="flex:1;min-width:0;text-transform:uppercase"><button type="button" class="copybtn" id="copyAdminIsin" data-copy-input="adminIsin" aria-label="Copy ISIN">Copy</button></div></div>
+    </div>
+    <div class="row3">
+      <div><label>Coupon (Interest Rate) % <span class="req">*</span></label><input type="number" name="coupon" step="0.0001" value="{{ b.coupon or '' }}" placeholder="9.85" required inputmode="decimal"></div>
+      <div><label>Coupon Frequency <span class="req">*</span></label>
+        <select name="coupon_frequency">
+          {% for f in ["Annual","Semi-Annual","Quarterly","Monthly","Zero Coupon"] %}
+            <option value="{{ f }}" {% if b.coupon_frequency==f %}selected{% endif %}>{{ f }}</option>
+          {% endfor %}
+        </select></div>
+      <div><label>Balance FV Per Bond <span class="req">*</span></label><input type="number" name="face_value" step="any" value="{{ b.face_value or '' }}" placeholder="1000 / 10000 / 100000" required inputmode="numeric"></div>
+    </div>
+    <div class="row3">
+      <div><label>Issuer Category <span class="opt">(optional)</span></label><input name="issuer_category" value="{{ b.issuer_category or '' }}" placeholder="NBFC / Bank / Corporate / Government"></div>
+      <div><label>Type <span class="opt">(optional)</span></label><input name="type" value="{{ b.type or '' }}" placeholder="NCD / G-Sec / SDL / ZCB"></div>
+      <div><label>Credit Rating <span class="opt">(optional)</span></label><input name="credit_rating" value="{{ b.credit_rating or '' }}" placeholder="AA (Crisil)"></div>
+    </div>
+    <div class="row3">
+      <div><label>Final Maturity / Call Date <span class="req">*</span></label><input type="date" name="maturity" value="{{ b.maturity or '' }}" required></div>
+      <div><label>Offer Yield % <span class="opt">(enter price <b>or</b> yield)</span></label><input type="number" name="offer_yield" step="0.0001" value="{{ b.offer_yield or '' }}" placeholder="9.40" inputmode="decimal"></div>
+      <div><label>Offer Price (per ₹100) <span class="opt">(auto from yield)</span><span class="auto-tag">auto</span></label><input type="number" name="offer_price" step="0.0001" value="{{ b.offer_price or '' }}" placeholder="102.35" inputmode="decimal"></div>
+    </div>
+    <div class="row3">
+      <div><label>Issue / Allotment date <span class="opt">(optional)</span></label><input type="date" name="issue_date" value="{{ b.issue_date or '' }}"></div>
+      <div><label>First coupon date <span class="opt">(optional)</span></label><input type="date" name="first_coupon" value="{{ b.first_coupon or '' }}"></div>
+      <div><label>Call date <span class="opt">(optional)</span></label><input type="date" name="call_date" value="{{ b.call_date or '' }}"></div>
+    </div>
+    <div class="row3">
+      <div><label>Min Investment <span class="opt">(₹ Lacs multiples)</span></label><input name="min_investment" value="{{ b.min_investment or '' }}" placeholder="1 (= ₹1,00,000)"></div>
+      <div><label>Residual Period <span class="opt">(auto)</span><span class="auto-tag">auto</span></label><input name="residual" value="{{ b.residual or '' }}" placeholder="computed from maturity"></div>
+      <div><label>Tiny URL <span class="opt">(auto)</span><span class="auto-tag">auto</span></label><input name="tiny_url" value="{{ b.tiny_url or '' }}" placeholder="/b/slug"></div>
+    </div>
+
+    <details class="adv">
+      <summary>Advanced <span class="opt">(all optional metadata)</span></summary>
+      <div class="row3" style="margin-top:10px">
+        <div><label>Put date</label><input type="date" name="put_date" value="{{ b.put_date or '' }}"></div>
+        <div><label>Day count convention <span class="auto-tag">auto</span></label>
+          <select name="day_count">
+            <option value="">Auto (G-Sec→ACT/ACT, else 30/360)</option>
+            {% for d in ["ACT/ACT","30/360","30E/360","ACT/365F","ACT/365L","ACT/365Y"] %}
+              <option value="{{ d }}" {% if b.day_count==d %}selected{% endif %}>{{ d }}</option>
+            {% endfor %}
+          </select></div>
+        <div><label>Coupon type</label><input name="coupon_type" value="{{ b.coupon_type or '' }}" placeholder="Fixed / Floating"></div>
+      </div>
+      <div class="row3">
+        <div><label>Guarantee</label><input name="guarantee" value="{{ b.guarantee or '' }}"></div>
+        <div><label>Listing</label><input name="listing" value="{{ b.listing or '' }}" placeholder="BSE / NSE"></div>
+        <div><label>Sector</label><input name="sector" value="{{ b.sector or '' }}"></div>
+      </div>
+      <div class="row3">
+        <div><label>Rating agency</label><input name="rating_agency" value="{{ b.rating_agency or '' }}"></div>
+        <div><label>Issue size</label><input name="issue_size" value="{{ b.issue_size or '' }}"></div>
+        <div><label>Mode of issuance</label><input name="mode" value="{{ b.mode or '' }}"></div>
+      </div>
+      <div class="row2">
+        <div><label>Series / Tranche</label><input name="series" value="{{ b.series or '' }}"></div>
+        <div><label>Taxable</label><input name="taxable" value="{{ b.taxable or '' }}" placeholder="Yes / No / Tax-free"></div>
+      </div>
+      <div><label>Notes</label><textarea name="notes">{{ b.notes or '' }}</textarea></div>
+    </details>
+
+    <div style="margin-top:22px;display:flex;gap:12px;flex-wrap:wrap">
+      <button class="btn primary" type="submit">{{ "Add Bond" if is_new else "Save Changes" }}</button>
+      <a class="btn ghost" href="{{ url_for('admin_dash') }}">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
