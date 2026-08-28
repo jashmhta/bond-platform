@@ -9,3 +9,7 @@ venv/
 instance/
 .DS_Store
 node_modules/
+.vercel
+.next/
+.env.*
+*.pdf

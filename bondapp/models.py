@@ -155,7 +155,7 @@ def default_day_count(security_type, issuer_category):
         return "ACT/ACT"
     if "government" in c or "sovereign" in c:
         return "ACT/ACT"
-    return "30/360"
+    return "ACT/365F"
 
 
 def parse_call_put(v, data):

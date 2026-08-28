@@ -31,7 +31,7 @@ def generate_schedule(maturity, freq=1, issue=None, first_coupon=None, adjust=Fa
             raise ValueError("first_coupon must precede maturity")
         dates = []
         cur = fc
-        while add_months(cur, step) < maturity:
+        while cur < maturity:
             dates.append(cur)
             cur = add_months(cur, step)
         dates.append(maturity)

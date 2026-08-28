@@ -107,12 +107,44 @@ class Bond:
                 return p
         if settlement == self.maturity:
             raise ValueError("bond matures on settlement date")
+        # IndiaBonds parity: during a long first stub, accrual reference is the
+        # anchored regular boundary before the first coupon (can precede settlement,
+        # producing negative elapsed days).
+        if self.first_coupon is not None and self._periods:
+            fc = self._periods[0].accrual_end
+            step = 12 // self.freq
+            prev = fc
+            from .daycount import add_months
+            while prev > settlement:
+                prev = add_months(prev, -step)
+            if prev <= settlement < fc:
+                return CouponPeriod(prev, fc, fc)
         raise ValueError("settlement outside accrual schedule")
+
+    def _accrual_reference_period(self, settlement):
+        """Period used for accrued-interest math.
+
+        IndiaBonds parity: when the schedule is anchored on first_coupon, the
+        accrual grid stays on the regular coupon boundaries (day-of-month of
+        the anchor) even inside a long first stub — elapsed days may be negative.
+        """
+        p = self._current_period(settlement)
+        if self.first_coupon is not None and self._periods:
+            fc = self._periods[0].accrual_end
+            # only special-case the long-stub period itself
+            if p.accrual_end == fc and (fc - p.accrual_start).days > 366 // max(self.freq, 1):
+                from .schedule import CouponPeriod
+                from .daycount import add_months
+                step = 12 // self.freq
+                # IndiaBonds: reference start is exactly one regular step before
+                # the first coupon; elapsed days may be negative inside a long stub.
+                return CouponPeriod(add_months(fc, -step), fc, fc)
+        return p
 
     def _pricing_accrued_per100(self, settlement):
         if self.coupon == 0.0 or self.freq == 0:
             return 0.0, 0
-        p = self._current_period(settlement)
+        p = self._accrual_reference_period(settlement)
         if self.day_count in ("30/360", "30E/360"):
             days = days_30_360(p.accrual_start, settlement, euro=self.day_count == "30E/360")
             return self.coupon * days / 360.0, days
@@ -131,7 +163,7 @@ class Bond:
         settlement = self._validate_settlement(settlement)
         if self.coupon == 0.0 or self.freq == 0:
             return 0.0, 0
-        p = self._current_period(settlement)
+        p = self._accrual_reference_period(settlement)
         if self.interest_basis == "ACT/365F":
             elapsed = (settlement - p.accrual_start).days
             return self.coupon * elapsed / 365.0, elapsed

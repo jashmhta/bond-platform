@@ -1,0 +1,74 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL_UNPOOLED")
+}
+
+model Client {
+  id                 String    @id @default(cuid())
+  panNumber          String?   @db.VarChar(10)
+  panDocUrl          String?
+  aadharNumber       String?   @db.VarChar(12)
+  aadharDocUrl       String?
+  aadharBackUrl      String?
+  cancelledChequeUrl String?
+  cmlCmrUrl          String?
+  mobileNo           String    @db.VarChar(15)
+  email              String    @db.VarChar(255)
+  ucc                String    @unique @db.VarChar(20)
+  holderName         String?
+  dob                DateTime? @db.Date
+  address            String?   @db.Text
+  bankIfsc           String?   @db.VarChar(11)
+  bankAccountNo      String?   @db.VarChar(20)
+  bankName           String?
+  dpId               String?   @db.VarChar(8)
+  clientId           String?   @db.VarChar(8)
+  dpName             String?
+  fatherName         String?
+  occupation         String?   @db.VarChar(60)
+  nomineeName        String?   @db.VarChar(80)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  deals              Deal[]
+}
+
+model Deal {
+  id                   String    @id @default(cuid())
+  refNo                String    @unique
+  type                 String    @db.VarChar(4)
+  date                 DateTime  @db.Date
+  serial               Int
+  clientId             String
+  client               Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  securityName         String
+  isin                 String?   @db.VarChar(12)
+  couponRate           Float?
+  maturityDate         DateTime? @db.Date
+  faceValue            Float?
+  quantity             Int?
+  price                Float?
+  cleanPrice           Float?
+  yieldValue           Float?
+  exchange             String    @default("BSE")
+  marketType           String    @default("ICDM")
+  settlementType       String    @default("T+0")
+  dematDpId            String?
+  dematClientId        String?
+  dematDpName          String?
+  clientAddress        String?   @db.Text
+  interestPaymentDates String?   @default("MONTHLY")
+  interestDays         Int?
+  principalAmount      Float?
+  accruedInterest      Float?
+  stampDuty            Float?
+  totalConsideration   Float?
+  createdAt            DateTime  @default(now())
+
+  @@index([date, type, serial])
+  @@index([clientId])
+}

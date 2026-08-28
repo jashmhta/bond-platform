@@ -133,8 +133,9 @@ def offer(slug):
     b["accrued_days_default"] = acc_days
     b["accrued_default"] = round(acc, 6)
     b["dirty_default"] = round(dirty, 6)
-    b["ytm_default"] = round(ytm, 6)
-    b["xirr_default"] = round(bond.xirr_from_price(price, settle_default, clean=True), 6)
+    b["ytm_default"] = round(bond.xirr_from_price(price, settle_default, clean=True), 6)
+    b["ytm_street_default"] = round(ytm, 6)
+    b["xirr_default"] = b["ytm_default"]
     b["eff_default"] = round(eff, 6)
     b["cy_default"] = round(current_yield(bond.coupon, price), 6)
     b["mac_default"] = round(mac, 6)
