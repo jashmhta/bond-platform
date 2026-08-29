@@ -150,14 +150,16 @@ export default function DealForm({
     offer_price: number | null; offer_yield: number | null;
     face_value: number | null; issue_date: string | null; first_coupon: string | null;
     credit_rating: string | null;
+    type: string | null;
   };
   const [bondQuery, setBondQuery] = useState("");
   const [bondHits, setBondHits] = useState<BondHit[]>([]);
   const [allBonds, setAllBonds] = useState<BondHit[]>([]);
   const [showBondList, setShowBondList] = useState(false);
+  const [selectedBonds, setSelectedBonds] = useState<BondHit[]>([]);
 
   useEffect(() => {
-    fetch("/api/bond-directory")
+    fetch("/security-master.json")
       .then((r) => r.json())
       .then((rows: BondHit[]) => Array.isArray(rows) && setAllBonds(rows))
       .catch(() => {});
@@ -167,11 +169,13 @@ export default function DealForm({
     setBondQuery(q);
     if (q.trim().length < 2) { setBondHits([]); setShowBondList(false); return; }
     const ql = q.toLowerCase();
+    const qIsin = ql.replace(/\s/g, "");
     const hits = allBonds.filter(
       (b) =>
+        (b.isin || "").toUpperCase().startsWith(qIsin.toUpperCase()) ||
         (b.security_name || "").toLowerCase().includes(ql) ||
-        (b.isin || "").toUpperCase().includes(ql.toUpperCase())
-    ).slice(0, 8);
+        (b.isin || "").toUpperCase().includes(qIsin.toUpperCase())
+    ).slice(0, 12);
     setBondHits(hits);
     setShowBondList(hits.length > 0);
   };
@@ -181,9 +185,14 @@ export default function DealForm({
       Monthly: "MONTHLY", Quarterly: "QUARTERLY", "Semi-Annual": "SEMI-ANNUALLY",
       Annual: "ANNUALLY", "ZERO_COUPON": "CUMULATIVE",
     };
+    const bn = b.security_name || "";
+    const hasCpn = /^\d{1,2}(?:\.\d+)?\s*%/.test(bn);
+    const mat = b.maturity ? new Date(b.maturity).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }).toUpperCase() : "";
+    const base = hasCpn ? bn : `${b.coupon || 0}% ${bn}`;
+    const secName = mat && !bn.toUpperCase().includes(mat) ? `${base} ${mat}`.trim() : base;
     setSec((s) => ({
       ...s,
-      securityName: `${b.coupon || 0}% ${b.security_name || ""} ${b.maturity ? new Date(b.maturity).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }).toUpperCase() : ""}`.trim(),
+      securityName: secName,
       isin: b.isin || "",
       couponRate: b.coupon != null ? String(b.coupon) : s.couponRate,
       paymentDates: FREQ[b.coupon_frequency] || s.paymentDates,
@@ -195,6 +204,20 @@ export default function DealForm({
     setBondQuery("");
     setBondHits([]);
     setShowBondList(false);
+  };
+
+  /* multi-select: add bond to selection without clearing previous */
+  const addBondToSelection = (b: BondHit) => {
+    if (selectedBonds.some((x) => x.isin === b.isin)) return;
+    setSelectedBonds((prev) => [...prev, b]);
+    selectBond(b);
+    setBondQuery("");
+    setBondHits([]);
+    setShowBondList(false);
+  };
+
+  const removeBondFromSelection = (isin: string) => {
+    setSelectedBonds((prev) => prev.filter((x) => x.isin !== isin));
   };
 
   /* ---- security (manual) ---- */
@@ -482,7 +505,7 @@ export default function DealForm({
 
       {/* 2 · security */}
       <div className="card">
-        <h2><span className="dot" />2 · Security <span className="badge">manual entry</span></h2>
+        <h2><span className="dot" />2 · Security &amp; Deal Terms <span className="badge">directory search · manual override</span></h2>
         <div className="relative">
           <label className="block">
             <span className="text-[12px] font-medium">Search security (from bond directory) <span className="auto-tag">auto-fills coupon · price · maturity · face</span></span>
@@ -497,17 +520,30 @@ export default function DealForm({
             <div className="absolute z-20 w-full mt-1 rounded-xl border border-line bg-white shadow-lift overflow-hidden max-h-[240px] overflow-y-auto">
               {bondHits.map((b) => (
                 <button key={b.slug} type="button" className="w-full text-left px-4 py-2.5 hover:bg-paper transition-colors border-b border-line last:border-0"
-                  onMouseDown={() => selectBond(b)}>
+                  onMouseDown={() => addBondToSelection(b)}>
                   <p className="text-[13px] font-medium truncate">{b.security_name}</p>
                   <p className="text-[11px] muted num mt-0.5">
-                    {b.isin} · {b.coupon ?? "—"}% {b.coupon_frequency} · {b.maturity ? b.maturity.slice(0, 10) : "—"} ·
-                    {' '}₹{b.offer_price ?? "—"}/{b.face_value ?? "—"} · {b.credit_rating || "—"}
+                    {b.isin} · {b.coupon ?? "—"}% {b.coupon_frequency || ""} · {b.maturity ? b.maturity.slice(0, 10) : "—"} ·
+                    {' '}₹{b.offer_price ?? "—"}/{b.face_value ?? "—"} · {b.credit_rating || "—"} · {b.type || ""}
                   </p>
                 </button>
               ))}
             </div>
           ) : null}
         </div>
+        {selectedBonds.length > 0 ? (
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {selectedBonds.map((b) => (
+              <span key={b.isin} className="inline-flex items-center gap-1 rounded-full border border-gold-line bg-gold-soft px-2.5 py-0.5 text-[11px] font-medium text-gold-deep">
+                {b.security_name?.slice(0, 35) || b.isin}
+                <button type="button" className="ml-0.5 text-[13px] leading-none hover:text-red" onClick={() => removeBondFromSelection(b.isin)} title="Remove">×</button>
+              </span>
+            ))}
+            {selectedBonds.length > 1 ? (
+              <button type="button" className="text-[10px] muted underline hover:text-red" onClick={() => setSelectedBonds([])}>clear all</button>
+            ) : null}
+          </div>
+        ) : null}
         <label className="block mt-3">
           <span className="text-[12px] font-medium">Security name (final — editable) *</span>
           <input className="calc-input w-full mt-1.5"
@@ -601,63 +637,62 @@ export default function DealForm({
             <p className="text-[11px] muted mt-1">Type a minus (e.g. −6) or press − for long-stub rebates · face × coupon% × days ÷ 365</p>
           </label>
         </div>
-      </div>
 
-      {/* 3 · exchange hardcoded */}
-      <div className="card">
-        <h2><span className="dot" />3 · Exchange <span className="badge gold">hardcoded · permanent</span></h2>
-        <div className="grid sm:grid-cols-2 gap-4">
-          <label className="block">
-            <span className="text-[12px] font-medium">Exchange</span>
-            <input className="calc-input w-full mt-1.5" value="BSE" readOnly />
-          </label>
-          <label className="block">
-            <span className="text-[12px] font-medium">Market type / settlement</span>
-            <input className="calc-input w-full mt-1.5" value="BSE T+0 — BSE CLEARING AGENT" readOnly />
-          </label>
-        </div>
-        <p className="note -mt-1">Not editable — BinaryBonds settles through BSE Clear rails.</p>
-      </div>
-
-      {/* 4 · date & ref */}
-      <div className="card">
-        <h2><span className="dot" />4 · Date &amp; reference no <span className="badge">calendar · serial order · editable</span></h2>
-        <div className="grid sm:grid-cols-3 gap-4">
-          <label className="block">
-            <span className="text-[12px] font-medium">Date * <span className="auto-tag">calendar</span></span>
-            <input type="date" className="calc-input w-full mt-1.5" value={date}
-              onChange={(e) => setDate(e.target.value)} />
-          </label>
-          <label className="block">
-            <span className="text-[12px] font-medium">Side *</span>
-            <select className="calc-input w-full mt-1.5" value={type}
-              onChange={(e) => setType(e.target.value as "TB" | "TS")}>
-              <option value="TS">TS — Today Sell</option>
-              <option value="TB">TB — Today Buy</option>
-            </select>
-          </label>
-          <label className="block">
-            <span className="text-[12px] font-medium">Serial (per day/side)</span>
-            <input type="number" min={1} max={999} className="calc-input w-full mt-1.5 num" value={serial}
+        {/* date & ref — above exchange */}
+        <div className="mt-5 pt-5 border-t border-line">
+          <p className="text-[11px] font-semibold tracking-[0.1em] uppercase muted mb-3">Date &amp; Reference No <span className="badge ml-2">calendar · serial · editable</span></p>
+          <div className="grid sm:grid-cols-3 gap-4">
+            <label className="block">
+              <span className="text-[12px] font-medium">Date * <span className="auto-tag">calendar</span></span>
+              <input type="date" className="calc-input w-full mt-1.5" value={date}
+                onChange={(e) => setDate(e.target.value)} />
+            </label>
+            <label className="block">
+              <span className="text-[12px] font-medium">Side *</span>
+              <select className="calc-input w-full mt-1.5" value={type}
+                onChange={(e) => setType(e.target.value as "TB" | "TS")}>
+                <option value="TS">TS — Today Sell</option>
+                <option value="TB">TB — Today Buy</option>
+              </select>
+            </label>
+            <label className="block">
+              <span className="text-[12px] font-medium">Serial (per day/side)</span>
+              <input type="number" min={1} max={999} className="calc-input w-full mt-1.5 num" value={serial}
+                onChange={(e) => {
+                  const v = Math.max(1, Math.min(999, Number(e.target.value) || 1));
+                  setSerial(v);
+                  setRefNo(`${type}${ymdOf(date)}${pad3(v)}`);
+                }} />
+            </label>
+          </div>
+          <label className="block mt-4">
+            <span className="text-[12px] font-medium">Reference No (editable)</span>
+            <input className="calc-input w-full mt-1.5 font-mono tracking-wide uppercase" value={refNo}
               onChange={(e) => {
-                const v = Math.max(1, Math.min(999, Number(e.target.value) || 1));
-                setSerial(v);
-                setRefNo(`${type}${ymdOf(date)}${pad3(v)}`);
+                setRefNo(e.target.value.toUpperCase());
+                setRefTouched(true);
               }} />
           </label>
+          <p className="note -mt-1">
+            Format <b>{`${type}·YYYYMMDD·###`}</b> — suggested automatically as the next serial in order for this
+            day &amp; side; overwrite freely before saving.
+          </p>
         </div>
-        <label className="block mt-4">
-          <span className="text-[12px] font-medium">Reference No (editable)</span>
-          <input className="calc-input w-full mt-1.5 font-mono tracking-wide uppercase" value={refNo}
-            onChange={(e) => {
-              setRefNo(e.target.value.toUpperCase());
-              setRefTouched(true);
-            }} />
-        </label>
-        <p className="note -mt-1">
-          Format <b>{`${type}·YYYYMMDD·###`}</b> — suggested automatically as the next serial in order for this
-          day &amp; side; overwrite freely before saving.
-        </p>
+
+        {/* exchange — hardcoded, always last */}
+        <div className="mt-5 pt-5 border-t border-line">
+          <p className="text-[11px] font-semibold tracking-[0.1em] uppercase muted mb-3">Exchange &amp; Settlement <span className="badge gold ml-2">hardcoded · permanent</span></p>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <label className="block">
+              <span className="text-[12px] font-medium">Exchange</span>
+              <input className="calc-input w-full mt-1.5" value="BSE" readOnly />
+            </label>
+            <label className="block">
+              <span className="text-[12px] font-medium">Market type / settlement</span>
+              <input className="calc-input w-full mt-1.5" value="BSE T+0 — BSE CLEARING CORPORATION" readOnly />
+            </label>
+          </div>
+        </div>
       </div>
 
       {/* amounts — face × price% → principal; accrued manual ±; stamp slab; TC = sum */}
