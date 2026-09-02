@@ -29,17 +29,11 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
       refNo: deal.refNo,
       dealDateDash: ddmm(deal.date, "-"),
       dealDateSlash: ddmm(deal.date, "/"),
+      dealDateLong: deal.date.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }),
       side: deal.type === "TB" ? "BUY" : "SELL",
       clientName: (deal.client.holderName || deal.client.ucc || "").toUpperCase(),
       pan: deal.client.panNumber || "—",
       clientAddress: deal.clientAddress || deal.client.address || "",
-      dobLabel: deal.client.dob ? ddmm(new Date(deal.client.dob), "/") : "",
-      ucc: deal.client.ucc || "",
-      mobile: deal.client.mobileNo || "",
-      email: deal.client.email || "",
-      fatherName: (deal.client as { fatherName?: string | null }).fatherName || "",
-      occupation: (deal.client as { occupation?: string | null }).occupation || "",
-      nomineeName: (deal.client as { nomineeName?: string | null }).nomineeName || "",
       bankName: deal.client.bankName || "",
       bankIfsc: deal.client.bankIfsc || "",
       bankAccountNo: deal.client.bankAccountNo || "",
@@ -65,8 +59,6 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
       dpId: deal.dematDpId || deal.client.dpId || "",
       clientId: deal.dematClientId || deal.client.clientId || "",
       dpName: deal.dematDpName || deal.client.dpName || "",
-      boId: [deal.dematDpId ?? deal.client.dpId, deal.dematClientId ?? deal.client.clientId]
-        .filter(Boolean).join("") || "",
     });
 
     return new NextResponse(Buffer.from(pdfBytes), {
